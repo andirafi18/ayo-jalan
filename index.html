@@ -49,17 +49,17 @@
   </header>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <!-- KARTU LIVE TRACKING ORDER (MUNCUL SAAT MODE REAL-TIME SUPABASE AKTIF) -->
+    <!-- KARTU LIVE TRACKING ORDER -->
     <div id="live-order-card" class="hidden mb-5 bg-white border-2 border-emerald-500 rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
-      <div>
+      <div class="space-y-1">
         <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <span id="live-order-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
           <p id="live-order-status" class="text-sm font-extrabold text-emerald-800">Mencari Driver Terdekat...</p>
         </div>
-        <p id="live-order-driver" class="text-xs text-slate-600 mt-0.5">Order Anda sudah dikirim ke seluruh mitra driver Ayo Jalan.</p>
+        <p id="live-order-driver" class="text-xs text-slate-600">Order Anda sudah dikirim ke seluruh mitra driver Ayo Jalan.</p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btn-fallback-wa" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">Hubungi WA Admin</button>
+        <button id="btn-fallback-wa" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">Kirim ke WA Admin</button>
         <button id="btn-cancel-live-order" type="button" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold">Batalkan</button>
       </div>
     </div>
@@ -163,13 +163,11 @@
               <p id="sum-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-700">Rp0</p>
             </div>
 
-            <!-- Metode Bayar -->
             <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2.5">
               <label class="cursor-pointer"><input type="radio" name="payment-method" value="Tunai" class="peer sr-only" checked /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 text-xs font-bold">Tunai <span class="font-normal text-slate-500">(ke driver)</span></div></label>
               <label class="cursor-pointer"><input type="radio" name="payment-method" value="QRIS" class="peer sr-only" /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 text-xs font-bold">QRIS <span class="font-normal text-slate-500">(E-Wallet/Bank)</span></div></label>
             </div>
 
-            <!-- Data Penumpang -->
             <div class="pt-2 space-y-2.5">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
@@ -185,7 +183,11 @@
                 <label for="order-note" class="block text-[11px] font-semibold text-slate-500 mb-1">Catatan Penjemputan (Opsional)</label>
                 <input id="order-note" type="text" placeholder="Contoh: Pakai jaket biru, tunggu depan pagar..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none" />
               </div>
-              <button id="btn-primary-action" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition">
+
+              <!-- Kotak Pesan Validasi / Status Langsung di Dekat Tombol -->
+              <div id="order-feedback-box" class="hidden p-3 rounded-xl text-xs font-semibold border"></div>
+
+              <button id="btn-primary-action" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                 <span id="primary-action-text">Pesan via WhatsApp</span>
               </button>
             </div>
@@ -241,9 +243,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <script>
     (async () => {
-      const C = window.AYO_CORE;
-      const CFG = window.AYO_CONFIG;
-      const sb = C.getSupabase();
+      const C = window.AYO_CORE, CFG = window.AYO_CONFIG, sb = C.getSupabase();
       let tariffs = await C.fetchActiveTariffs();
 
       const KEYS = { HISTORY: 'ayojalan_user_recent_routes', PAX_NAME: 'ayojalan_pax_name', PAX_PHONE: 'ayojalan_pax_phone', ACTIVE_ORDER: 'ayojalan_active_order_id' };
@@ -251,14 +251,15 @@
         pickup: null, dropoff: null, activeMapMode: 'pickup',
         routeDistanceKm: null, routeDurationSec: null,
         pickupMarker: null, dropoffMarker: null, routeLine: null, liveDriverMarker: null,
-        deviceGps: null, deviceGpsMarker: null, hasAutoCenteredGps: false,
-        activeOrderId: null, orderChannel: null, lastCalc: {},
-        searchAbort: { pickup: null, dropoff: null }
+        deviceGps: null, deviceGpsMarker: null,
+        activeOrderId: null, orderChannel: null, pollTimer: null, isSubmitting: false,
+        lastCalc: {}, searchAbort: { pickup: null, dropoff: null }
       };
 
       const el = {
-        gpsStatus: document.getElementById('gps-header-status'), gpsDot: document.getElementById('gps-header-dot'), gpsText: document.getElementById('gps-header-text'),
-        liveCard: document.getElementById('live-order-card'), liveStatus: document.getElementById('live-order-status'), liveDriver: document.getElementById('live-order-driver'),
+        gpsDot: document.getElementById('gps-header-dot'), gpsText: document.getElementById('gps-header-text'),
+        liveCard: document.getElementById('live-order-card'), liveDot: document.getElementById('live-order-dot'),
+        liveStatus: document.getElementById('live-order-status'), liveDriver: document.getElementById('live-order-driver'),
         btnFallbackWa: document.getElementById('btn-fallback-wa'), btnCancelLive: document.getElementById('btn-cancel-live-order'),
         pickupInput: document.getElementById('pickup-input'), dropoffInput: document.getElementById('dropoff-input'),
         pickupResults: document.getElementById('pickup-results'), dropoffResults: document.getElementById('dropoff-results'),
@@ -268,6 +269,7 @@
         modePickup: document.getElementById('mode-pickup'), modeDropoff: document.getElementById('mode-dropoff'),
         recentBox: document.getElementById('recent-routes-container'), recentList: document.getElementById('recent-routes-list'), btnClearHistory: document.getElementById('btn-clear-history'),
         alert: document.getElementById('route-alert'), alertText: document.getElementById('route-alert-text'),
+        orderFeedback: document.getElementById('order-feedback-box'),
         autoBadge: document.getElementById('auto-condition-badge'), sumSvcBadge: document.getElementById('summary-service-badge'),
         sumDist: document.getElementById('sum-distance'), sumDur: document.getElementById('sum-duration'), sumRate: document.getElementById('sum-rate'),
         sumMinBadge: document.getElementById('sum-min-badge'), sumBase: document.getElementById('sum-base-fare'),
@@ -284,6 +286,15 @@
         mapDot: document.getElementById('map-hint-dot'), mapText: document.getElementById('map-hint-text'),
         mapBadge: document.getElementById('map-route-badge'), mapBadgeText: document.getElementById('map-route-badge-text'), mapLoading: document.getElementById('map-loading')
       };
+
+      function showOrderFeedback(msg, type = 'warning') {
+        const cls = type === 'success'
+          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+          : (type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-amber-50 text-amber-800 border-amber-300');
+        el.orderFeedback.className = `p-3 rounded-xl text-xs font-semibold border ${cls}`;
+        el.orderFeedback.textContent = msg;
+      }
+      function hideOrderFeedback() { el.orderFeedback.classList.add('hidden'); }
 
       function applyTariffLabels() {
         document.querySelector('input[data-code="motor"]').value = tariffs.motor_rate;
@@ -312,27 +323,45 @@
         if (!state.pickup || !state.dropoff) return;
         el.mapLoading.classList.remove('hidden');
         try {
-          const url = `https://router.project-osrm.org/route/v1/driving/${state.pickup.lng},${state.pickup.lat};${state.dropoff.lng},${state.dropoff.lat}?overview=full&geometries=geojson`;
-          const res = await fetch(url);
+          const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${state.pickup.lng},${state.pickup.lat};${state.dropoff.lng},${state.dropoff.lat}?overview=full&geometries=geojson`);
           const data = await res.json();
           el.mapLoading.classList.add('hidden');
           if (!data.routes || !data.routes.length) throw new Error();
           const r = data.routes[0];
-          state.routeDistanceKm = r.distance / 1000;
-          state.routeDurationSec = r.duration;
+          state.routeDistanceKm = r.distance / 1000; state.routeDurationSec = r.duration;
           state.routeLine = L.polyline(r.geometry.coordinates.map(c => [c[1], c[0]]), { color: '#059669', weight: 6, opacity: 0.9 }).addTo(map);
           map.fitBounds(state.routeLine.getBounds(), { padding: [50, 50] });
-          el.mapBadge.classList.remove('hidden');
-          el.mapBadgeText.textContent = `${state.routeDistanceKm.toFixed(2)} km • ${C.formatDuration(state.routeDurationSec)}`;
-          el.alert.classList.add('hidden');
-          saveRecentRoute(state.pickup, state.dropoff);
-          calculateFare();
+          el.mapBadge.classList.remove('hidden'); el.mapBadgeText.textContent = `${state.routeDistanceKm.toFixed(2)} km • ${C.formatDuration(state.routeDurationSec)}`;
+          el.alert.classList.add('hidden'); hideOrderFeedback();
+          saveRecentRoute(state.pickup, state.dropoff); calculateFare();
         } catch {
-          el.mapLoading.classList.add('hidden');
-          state.routeDistanceKm = null; state.routeDurationSec = null;
+          el.mapLoading.classList.add('hidden'); state.routeDistanceKm = null; state.routeDurationSec = null;
           el.alert.className = 'mt-3.5 p-3 rounded-xl text-xs font-medium border bg-rose-50 text-rose-700 border-rose-200';
           el.alertText.textContent = 'Rute jalan raya tidak ditemukan. Geser pin ke jalan terdekat.';
           calculateFare();
+        }
+      }
+
+      function updatePrimaryButtonUI() {
+        if (state.isSubmitting) {
+          el.btnPrimary.disabled = true;
+          el.primaryText.textContent = '⏳ Mengirim pesanan ke driver...';
+          return;
+        }
+        if (state.activeOrderId) {
+          el.btnPrimary.disabled = true;
+          el.btnPrimary.className = 'w-full py-3.5 px-4 rounded-xl bg-slate-400 text-white font-bold text-sm cursor-not-allowed';
+          el.primaryText.textContent = '🔎 Pesanan Sedang Berlangsung (Lihat Kartu Atas)';
+          return;
+        }
+        el.btnPrimary.disabled = false;
+        const payMethod = state.lastCalc.paymentMethod || 'Tunai';
+        if (payMethod === 'QRIS') {
+          el.primaryText.textContent = sb ? 'Bayar QRIS & Pesan Otomatis' : 'Bayar QRIS & Pesan via WA';
+          el.btnPrimary.className = 'w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition';
+        } else {
+          el.primaryText.textContent = sb ? 'Pesan Driver Sekarang (Otomatis)' : 'Pesan via WhatsApp';
+          el.btnPrimary.className = 'w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition';
         }
       }
 
@@ -347,37 +376,21 @@
 
         el.autoBadge.textContent = isMtn ? `${surge.badge} • Pegunungan` : surge.badge;
 
-        const rawFare = dKm * rate;
-        const isMin = dKm > 0 && rawFare < minFare;
-        const baseFare = dKm > 0 ? Math.max(minFare, rawFare) : 0;
-        const surgeFee = baseFare * (surge.multiplier - 1);
-        const mtnFee = isMtn && baseFare > 0 ? Math.round(baseFare * (tariffs.mountain_pct / 100)) : 0;
-        const plat = C.calcPlatformFee(dKm, baseFare, vehicle);
-        const total = baseFare + surgeFee + mtnFee + plat.fee;
+        const rawFare = dKm * rate, isMin = dKm > 0 && rawFare < minFare, baseFare = dKm > 0 ? Math.max(minFare, rawFare) : 0;
+        const surgeFee = baseFare * (surge.multiplier - 1), mtnFee = isMtn && baseFare > 0 ? Math.round(baseFare * (tariffs.mountain_pct / 100)) : 0;
+        const plat = C.calcPlatformFee(dKm, baseFare, vehicle), total = baseFare + surgeFee + mtnFee + plat.fee;
         const durText = state.routeDurationSec ? C.formatDuration(state.routeDurationSec) : '-';
 
         state.lastCalc = { code, rate, label, vehicle, surge, isMtn, mtnFee, payMethod, platformFee: plat.fee, totalFare: total, driverNet: Math.max(0, total - plat.fee), distanceKm: dKm, durationSec: state.routeDurationSec || 0, durationText: durText };
 
-        el.sumSvcBadge.textContent = label;
-        el.sumDist.textContent = `${dKm.toFixed(2)} km`;
-        el.sumDur.textContent = durText;
-        el.sumRate.textContent = `${C.formatIDR(rate)}/km`;
-        el.sumMinBadge.classList.toggle('hidden', !isMin);
-        el.sumBase.textContent = C.formatIDR(baseFare);
-        el.rowSurge.classList.toggle('hidden', surge.multiplier <= 1 || baseFare <= 0);
-        el.sumSurgeLbl.textContent = surge.label; el.sumSurgeFee.textContent = `+${C.formatIDR(surgeFee)}`;
-        el.rowMtn.classList.toggle('hidden', !isMtn || baseFare <= 0);
-        el.sumMtnLbl.textContent = `Rute Pegunungan (+${tariffs.mountain_pct}%)`; el.sumMtnFee.textContent = `+${C.formatIDR(mtnFee)}`;
+        el.sumSvcBadge.textContent = label; el.sumDist.textContent = `${dKm.toFixed(2)} km`; el.sumDur.textContent = durText; el.sumRate.textContent = `${C.formatIDR(rate)}/km`;
+        el.sumMinBadge.classList.toggle('hidden', !isMin); el.sumBase.textContent = C.formatIDR(baseFare);
+        el.rowSurge.classList.toggle('hidden', surge.multiplier <= 1 || baseFare <= 0); el.sumSurgeLbl.textContent = surge.label; el.sumSurgeFee.textContent = `+${C.formatIDR(surgeFee)}`;
+        el.rowMtn.classList.toggle('hidden', !isMtn || baseFare <= 0); el.sumMtnLbl.textContent = `Rute Pegunungan (+${tariffs.mountain_pct}%)`; el.sumMtnFee.textContent = `+${C.formatIDR(mtnFee)}`;
         el.sumPlatPct.textContent = plat.pctLabel; el.sumPlatNote.textContent = plat.note; el.sumPlatFee.textContent = C.formatIDR(plat.fee);
         el.sumTotal.textContent = C.formatIDR(total);
 
-        if (payMethod === 'QRIS') {
-          el.primaryText.textContent = sb ? 'Bayar QRIS & Pesan Otomatis' : 'Bayar QRIS & Pesan via WA';
-          el.btnPrimary.className = 'w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition';
-        } else {
-          el.primaryText.textContent = sb ? 'Pesan Driver Sekarang (Otomatis)' : 'Pesan via WhatsApp';
-          el.btnPrimary.className = 'w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition';
-        }
+        updatePrimaryButtonUI();
       }
 
       function setMapMode(m) {
@@ -389,18 +402,13 @@
       }
 
       function setPoint(type, lat, lng, lbl = null, rev = false) {
-        const isP = type === 'pickup';
-        const pt = { lat: Number(lat), lng: Number(lng), label: lbl || `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` };
+        const isP = type === 'pickup', pt = { lat: Number(lat), lng: Number(lng), label: lbl || `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` };
         if (isP) { state.pickup = pt; el.pickupInput.value = pt.label; el.btnClearPickup.classList.remove('hidden'); }
         else { state.dropoff = pt; el.dropoffInput.value = pt.label; el.btnClearDropoff.classList.remove('hidden'); }
         const ex = isP ? state.pickupMarker : state.dropoffMarker;
         if (ex) ex.setLatLng([pt.lat, pt.lng]);
-        else {
-          const m = L.marker([pt.lat, pt.lng], { icon: pinIcon(type), draggable: true }).addTo(map);
-          m.on('dragend', e => setPoint(type, e.target.getLatLng().lat, e.target.getLatLng().lng, null, true));
-          if (isP) state.pickupMarker = m; else state.dropoffMarker = m;
-        }
-        if (rev) reverseGeo(type, pt.lat, pt.lng);
+        else { const m = L.marker([pt.lat, pt.lng], { icon: pinIcon(type), draggable: true }).addTo(map); m.on('dragend', e => setPoint(type, e.target.getLatLng().lat, e.target.getLatLng().lng, null, true)); if (isP) state.pickupMarker = m; else state.dropoffMarker = m; }
+        if (rev) fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pt.lat}&lon=${pt.lng}&zoom=18`, { headers: { 'Accept-Language': 'id' } }).then(r => r.json()).then(d => { if (d && d.display_name) { const s = d.display_name.split(',').slice(0, 3).join(', '); if (isP && state.pickup) { state.pickup.label = s; el.pickupInput.value = s; } else if (!isP && state.dropoff) { state.dropoff.label = s; el.dropoffInput.value = s; } calculateFare(); } }).catch(() => {});
         if (isP && !state.dropoff) setMapMode('dropoff');
         if (state.pickup && state.dropoff) computeRoute(); else { map.panTo([pt.lat, pt.lng]); calculateFare(); }
       }
@@ -413,44 +421,14 @@
         calculateFare();
       }
 
-      async function reverseGeo(type, lat, lng) {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`, { headers: { 'Accept-Language': 'id' } });
-          const d = await res.json();
-          if (d && d.display_name) {
-            const s = d.display_name.split(',').map(x => x.trim()).slice(0, 3).join(', ');
-            if (type === 'pickup' && state.pickup) { state.pickup.label = s; el.pickupInput.value = s; }
-            else if (type === 'dropoff' && state.dropoff) { state.dropoff.label = s; el.dropoffInput.value = s; }
-            calculateFare();
-          }
-        } catch {}
-      }
-
-      function filterPois(q) {
-        const s = q.trim().toLowerCase();
-        return !s ? C.BONDOWOSO_POIS.slice(0, 6) : C.BONDOWOSO_POIS.filter(p => p.name.toLowerCase().includes(s) || p.area.toLowerCase().includes(s));
-      }
-
+      function filterPois(q) { const s = q.trim().toLowerCase(); return !s ? C.BONDOWOSO_POIS.slice(0, 6) : C.BONDOWOSO_POIS.filter(p => p.name.toLowerCase().includes(s) || p.area.toLowerCase().includes(s)); }
       function renderDrop(type, locals, osms = []) {
-        const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults;
-        listEl.innerHTML = '';
+        const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults; listEl.innerHTML = '';
         if (!locals.length && !osms.length) { listEl.classList.add('hidden'); return; }
-        locals.forEach(p => {
-          const li = document.createElement('li'); li.className = 'px-3.5 py-2 hover:bg-emerald-50 cursor-pointer text-xs';
-          li.innerHTML = `<p class="font-semibold text-slate-800">★ ${C.escapeHtml(p.name)}</p><p class="text-[11px] text-slate-500">${C.escapeHtml(p.area)}</p>`;
-          li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, p.lat, p.lng, p.name, false); });
-          listEl.appendChild(li);
-        });
-        osms.forEach(i => {
-          const li = document.createElement('li'); li.className = 'px-3.5 py-2 hover:bg-emerald-50 cursor-pointer text-xs';
-          const parts = i.display_name.split(',');
-          li.innerHTML = `<p class="font-semibold text-slate-800">${C.escapeHtml(parts[0])}</p><p class="text-[11px] text-slate-500">${C.escapeHtml(parts.slice(1, 3).join(','))}</p>`;
-          li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, i.lat, i.lon, parts.slice(0, 3).join(', '), false); });
-          listEl.appendChild(li);
-        });
+        locals.forEach(p => { const li = document.createElement('li'); li.className = 'px-3.5 py-2 hover:bg-emerald-50 cursor-pointer text-xs'; li.innerHTML = `<p class="font-semibold text-slate-800">★ ${C.escapeHtml(p.name)}</p><p class="text-[11px] text-slate-500">${C.escapeHtml(p.area)}</p>`; li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, p.lat, p.lng, p.name, false); }); listEl.appendChild(li); });
+        osms.forEach(i => { const li = document.createElement('li'); li.className = 'px-3.5 py-2 hover:bg-emerald-50 cursor-pointer text-xs'; const parts = i.display_name.split(','); li.innerHTML = `<p class="font-semibold text-slate-800">${C.escapeHtml(parts[0])}</p><p class="text-[11px] text-slate-500">${C.escapeHtml(parts.slice(1, 3).join(','))}</p>`; li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, i.lat, i.lon, parts.slice(0, 3).join(', '), false); }); listEl.appendChild(li); });
         listEl.classList.remove('hidden');
       }
-
       async function searchOsm(type, q, locals) {
         if (q.trim().length < 3) return;
         if (state.searchAbort[type]) state.searchAbort[type].abort();
@@ -461,30 +439,19 @@
           renderDrop(type, locals, await res.json());
         } catch {}
       }
-
       const deb = (fn, d) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), d); }; };
       const debP = deb((v, l) => searchOsm('pickup', v, l), 400), debD = deb((v, l) => searchOsm('dropoff', v, l), 400);
 
       function loadRecent() { try { return JSON.parse(localStorage.getItem(KEYS.HISTORY) || '[]'); } catch { return []; } }
       function saveRecentRoute(p, d) {
-        try {
-          const key = `${p.lat.toFixed(4)},${p.lng.toFixed(4)}->${d.lat.toFixed(4)},${d.lng.toFixed(4)}`;
-          localStorage.setItem(KEYS.HISTORY, JSON.stringify([{ key, pickup: p, dropoff: d }, ...loadRecent().filter(i => i.key !== key)].slice(0, 3)));
-          renderRecent();
-        } catch {}
+        try { const key = `${p.lat.toFixed(4)},${p.lng.toFixed(4)}->${d.lat.toFixed(4)},${d.lng.toFixed(4)}`; localStorage.setItem(KEYS.HISTORY, JSON.stringify([{ key, pickup: p, dropoff: d }, ...loadRecent().filter(i => i.key !== key)].slice(0, 3))); renderRecent(); } catch {}
       }
       function renderRecent() {
         const list = loadRecent(); el.recentBox.classList.toggle('hidden', !list.length); el.recentList.innerHTML = '';
-        list.forEach(item => {
-          const b = document.createElement('button'); b.type = 'button';
-          b.className = 'w-full text-left px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-xs truncate';
-          b.textContent = `${item.pickup.label} → ${item.dropoff.label}`;
-          b.addEventListener('click', () => { setPoint('pickup', item.pickup.lat, item.pickup.lng, item.pickup.label, false); setPoint('dropoff', item.dropoff.lat, item.dropoff.lng, item.dropoff.label, false); });
-          el.recentList.appendChild(b);
-        });
+        list.forEach(item => { const b = document.createElement('button'); b.type = 'button'; b.className = 'w-full text-left px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-xs truncate'; b.textContent = `${item.pickup.label} → ${item.dropoff.label}`; b.addEventListener('click', () => { setPoint('pickup', item.pickup.lat, item.pickup.lng, item.pickup.label, false); setPoint('dropoff', item.dropoff.lat, item.dropoff.lng, item.dropoff.label, false); }); el.recentList.appendChild(b); });
       }
 
-      // === MODE REAL-TIME SUPABASE + LIVE TRACKING ===
+      // === REAL-TIME ORDER & POLLING ===
       function updateLiveDriverMarker(lat, lng, name) {
         if (!lat || !lng) return;
         const icon = L.divIcon({ className: 'custom-pin-wrapper', html: `<div style="background:#059669;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:9999px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);transform:translate(-50%,-50%);white-space:nowrap;">🚕 ${C.escapeHtml(name || 'Driver')}</div>`, iconSize: [0, 0] });
@@ -497,76 +464,98 @@
         state.activeOrderId = orderId;
         localStorage.setItem(KEYS.ACTIVE_ORDER, orderId);
         el.liveCard.classList.remove('hidden');
+        updatePrimaryButtonUI();
 
         if (state.orderChannel) sb.removeChannel(state.orderChannel);
         state.orderChannel = sb.channel(`order-${orderId}`)
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, payload => {
-            renderOrderStatusUI(payload.new);
-          }).subscribe();
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, payload => renderOrderStatusUI(payload.new))
+          .subscribe();
+
+        if (state.pollTimer) clearInterval(state.pollTimer);
+        state.pollTimer = setInterval(async () => {
+          if (!state.activeOrderId) return;
+          const { data } = await sb.from('orders').select('*').eq('id', state.activeOrderId).single();
+          if (data) renderOrderStatusUI(data);
+        }, 5000);
       }
 
       function renderOrderStatusUI(ord) {
         if (!ord) return;
         const mapStatus = {
-          pending: 'Mencari Driver Terdekat...',
-          to_pickup: `Driver (${ord.driver_name || 'Mitra'}) Sedang Menuju Titik Jemput!`,
-          to_dropoff: `Dalam Perjalanan Menuju Tujuan (${ord.driver_name || 'Mitra'})`,
-          arrived: 'Anda Telah Tiba di Tujuan. Silakan Selesaikan Pembayaran.',
-          completed: 'Perjalanan Selesai. Terima Kasih Telah Menggunakan Ayo Jalan!',
-          cancelled: 'Order Dibatalkan.'
+          pending: '⏳ Mencari Driver Terdekat...',
+          to_pickup: `🚕 Driver (${ord.driver_name || 'Mitra'}) Sedang Menuju Lokasi Jemput!`,
+          to_dropoff: `🛣️ Dalam Perjalanan Menuju Tujuan (${ord.driver_name || 'Mitra'})`,
+          arrived: '🏁 Anda Telah Tiba di Tujuan. Silakan Lakukan Pembayaran.',
+          completed: '✅ Perjalanan Selesai! Terima Kasih Telah Menggunakan Ayo Jalan.',
+          cancelled: '❌ Order Dibatalkan.'
         };
         el.liveStatus.textContent = mapStatus[ord.status] || ord.status;
-        el.liveDriver.textContent = ord.driver_name ? `Driver: ${ord.driver_name} • Total: ${C.formatIDR(ord.total_fare)}` : `Menunggu konfirmasi driver... (${C.formatIDR(ord.total_fare)})`;
+        el.liveDriver.textContent = ord.driver_name
+          ? `Driver: ${ord.driver_name} • Rute: ${ord.pickup_name} → ${ord.dropoff_name} (${C.formatIDR(ord.total_fare)})`
+          : `Rute: ${ord.pickup_name} → ${ord.dropoff_name} • Total: ${C.formatIDR(ord.total_fare)}`;
+
         if (ord.driver_lat && ord.driver_lng) updateLiveDriverMarker(ord.driver_lat, ord.driver_lng, ord.driver_name);
+
         if (ord.status === 'completed' || ord.status === 'cancelled') {
+          el.liveDot.classList.remove('animate-ping');
           localStorage.removeItem(KEYS.ACTIVE_ORDER);
+          state.activeOrderId = null;
+          if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
           if (state.liveDriverMarker) { map.removeLayer(state.liveDriverMarker); state.liveDriverMarker = null; }
+          showOrderFeedback(mapStatus[ord.status], ord.status === 'completed' ? 'success' : 'warning');
+          updatePrimaryButtonUI();
+        } else {
+          showOrderFeedback(`${mapStatus[ord.status]} (Pantau kartu status di atas)`, 'success');
         }
       }
 
       async function createRealtimeOrder(isQrisPaid) {
-        const c = state.lastCalc;
-        const payload = {
-          passenger_name: el.paxName.value.trim(),
-          passenger_phone: C.normalizePhoneWa(el.paxPhone.value),
-          pickup_name: state.pickup.label, pickup_lat: state.pickup.lat, pickup_lng: state.pickup.lng,
-          dropoff_name: state.dropoff.label, dropoff_lat: state.dropoff.lat, dropoff_lng: state.dropoff.lng,
-          distance_km: Number(c.distanceKm.toFixed(2)), duration_sec: Math.round(c.durationSec),
-          service_code: c.code, service_label: c.label, surge_mult: c.surge.multiplier, is_mountain: c.isMtn,
-          platform_fee: Math.round(c.platformFee), total_fare: Math.round(c.totalFare), driver_net: Math.round(c.driverNet),
-          payment_method: c.payMethod, payment_status: isQrisPaid ? 'pending_verify' : 'unpaid',
-          note: el.orderNote.value.trim(), status: 'pending'
-        };
-        const { data, error } = await sb.from('orders').insert([payload]).select().single();
-        if (error) { alert('Gagal membuat order otomatis, dialihkan ke WhatsApp Admin.'); sendOrderWa(isQrisPaid); return; }
-        subscribeLiveOrder(data.id);
-        renderOrderStatusUI(data);
+        state.isSubmitting = true;
+        updatePrimaryButtonUI();
+        hideOrderFeedback();
+
+        try {
+          const c = state.lastCalc;
+          const payload = {
+            passenger_name: el.paxName.value.trim(),
+            passenger_phone: C.normalizePhoneWa(el.paxPhone.value),
+            pickup_name: state.pickup.label, pickup_lat: state.pickup.lat, pickup_lng: state.pickup.lng,
+            dropoff_name: state.dropoff.label, dropoff_lat: state.dropoff.lat, dropoff_lng: state.dropoff.lng,
+            distance_km: Number((c.distanceKm || 0).toFixed(2)), duration_sec: Math.round(c.durationSec || 0),
+            service_code: c.code, service_label: c.label, surge_mult: c.surge.multiplier, is_mountain: !!c.isMtn,
+            platform_fee: Math.round(c.platformFee || 0), total_fare: Math.round(c.totalFare || 0), driver_net: Math.round(c.driverNet || 0),
+            payment_method: c.payMethod, payment_status: isQrisPaid ? 'pending_verify' : 'unpaid',
+            note: el.orderNote.value.trim(), status: 'pending'
+          };
+
+          const { data, error } = await sb.from('orders').insert([payload]).select().single();
+          state.isSubmitting = false;
+
+          if (error || !data) {
+            showOrderFeedback(`Gagal mengirim ke server (${error ? error.message : 'Error'}). Silakan coba lagi atau klik kirim ke WA Admin.`, 'error');
+            updatePrimaryButtonUI();
+            return;
+          }
+
+          subscribeLiveOrder(data.id);
+          renderOrderStatusUI(data);
+          // Scroll halus ke atas agar kartu status & peta terlihat langsung oleh penumpang!
+          el.liveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (err) {
+          state.isSubmitting = false;
+          showOrderFeedback('Koneksi gagal saat mengirim pesanan. Periksa internet Anda.', 'error');
+          updatePrimaryButtonUI();
+        }
       }
 
-      // === WHATSAPP DEEP LINK ===
       function enc(s) { return encodeURIComponent(String(s || '').trim().slice(0, 80)).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase()); }
       function sendOrderWa(isQrisPaid) {
         const c = state.lastCalc, name = el.paxName.value.trim(), phone = C.normalizePhoneWa(el.paxPhone.value), note = el.orderNote.value.trim();
         const baseDrv = new URL('./driver.html', window.location.href).href.split('?')[0];
-        const params = [
-          `plat=${state.pickup.lat.toFixed(6)}`, `plng=${state.pickup.lng.toFixed(6)}`, `pname=${enc(state.pickup.label)}`,
-          `dlat=${state.dropoff.lat.toFixed(6)}`, `dlng=${state.dropoff.lng.toFixed(6)}`, `dname=${enc(state.dropoff.label)}`,
-          `svc=${enc(c.rate)}`, `surge=${enc(c.surge.multiplier.toFixed(1))}`, `mtn=${c.isMtn ? '1' : '0'}`,
-          `pay=${enc(isQrisPaid ? 'QRIS (Sudah Bayar)' : c.payMethod)}`, `pax=${enc(name)}`, `phone=${enc(phone)}`
-        ];
+        const params = [`plat=${state.pickup.lat.toFixed(6)}`, `plng=${state.pickup.lng.toFixed(6)}`, `pname=${enc(state.pickup.label)}`, `dlat=${state.dropoff.lat.toFixed(6)}`, `dlng=${state.dropoff.lng.toFixed(6)}`, `dname=${enc(state.dropoff.label)}`, `svc=${enc(c.rate)}`, `surge=${enc(c.surge.multiplier.toFixed(1))}`, `mtn=${c.isMtn ? '1' : '0'}`, `pay=${enc(isQrisPaid ? 'QRIS (Sudah Bayar)' : c.payMethod)}`, `pax=${enc(name)}`, `phone=${enc(phone)}`];
         if (note) params.push(`note=${enc(note)}`);
         const drvLink = `${baseDrv}?${params.join('&')}`;
-
-        const lines = [
-          'Halo Admin *Ayo Jalan Bondowoso*! Saya ingin memesan perjalanan:', '',
-          `*Nama Penumpang:* ${name}`, `*No. HP/WA:* +${phone}`, `*Layanan:* ${c.label}`,
-          `*Titik Jemput:* ${state.pickup.label}`, `  Maps: https://maps.google.com/?q=${state.pickup.lat},${state.pickup.lng}`,
-          `*Titik Tujuan:* ${state.dropoff.label}`, `  Maps: https://maps.google.com/?q=${state.dropoff.lat},${state.dropoff.lng}`,
-          `*Jarak & Waktu:* ${c.distanceKm.toFixed(2)} km (${c.durationText})`,
-          `*Tarif Kondisi:* ${c.surge.label}${c.isMtn ? ' + Pegunungan' : ''}`,
-          `*Metode Bayar:* ${isQrisPaid ? 'QRIS (Sudah Transfer - bukti terlampir)' : 'Tunai'}`,
-          `*Estimasi Total:* ${C.formatIDR(c.totalFare)}`
-        ];
+        const lines = ['Halo Admin *Ayo Jalan Bondowoso*! Saya ingin memesan perjalanan:', '', `*Nama Penumpang:* ${name}`, `*No. HP/WA:* +${phone}`, `*Layanan:* ${c.label}`, `*Titik Jemput:* ${state.pickup.label}`, `  Maps: https://maps.google.com/?q=${state.pickup.lat},${state.pickup.lng}`, `*Titik Tujuan:* ${state.dropoff.label}`, `  Maps: https://maps.google.com/?q=${state.dropoff.lat},${state.dropoff.lng}`, `*Jarak & Waktu:* ${c.distanceKm.toFixed(2)} km (${c.durationText})`, `*Tarif Kondisi:* ${c.surge.label}${c.isMtn ? ' + Pegunungan' : ''}`, `*Metode Bayar:* ${isQrisPaid ? 'QRIS (Sudah Transfer - bukti terlampir)' : 'Tunai'}`, `*Estimasi Total:* ${C.formatIDR(c.totalFare)}`];
         if (note) lines.push(`*Catatan:* ${note}`);
         lines.push('', '------------------------------', '*KHUSUS DRIVER (Klik link ini untuk buka navigasi otomatis):*', drvLink);
         window.open(`https://wa.me/${CFG.ADMIN_WA}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener,noreferrer');
@@ -582,11 +571,15 @@
       }
 
       function validate() {
-        if (!state.pickup || !state.dropoff || !state.routeDistanceKm) { el.alert.className = 'mt-3.5 p-3 rounded-xl text-xs font-medium border bg-amber-50 text-amber-800 border-amber-200'; el.alertText.textContent = 'Pilih titik jemput & tujuan terlebih dahulu.'; return false; }
+        if (!state.pickup || !state.dropoff || !state.routeDistanceKm) {
+          showOrderFeedback('Pilih Titik Penjemputan dan Titik Tujuan pada peta terlebih dahulu.', 'warning');
+          return false;
+        }
         const n = el.paxName.value.trim(), ph = C.normalizePhoneWa(el.paxPhone.value);
-        if (!n) { alert('Mohon isi Nama Penumpang.'); el.paxName.focus(); return false; }
-        if (ph.length < 9) { alert('Mohon isi No. HP / WhatsApp yang valid agar driver dapat menghubungi Anda.'); el.paxPhone.focus(); return false; }
+        if (!n) { showOrderFeedback('Mohon isi Nama Penumpang terlebih dahulu.', 'warning'); el.paxName.focus(); return false; }
+        if (ph.length < 9) { showOrderFeedback('Mohon isi No. HP / WhatsApp yang valid agar driver bisa menghubungi Anda.', 'warning'); el.paxPhone.focus(); return false; }
         localStorage.setItem(KEYS.PAX_NAME, n); localStorage.setItem(KEYS.PAX_PHONE, el.paxPhone.value.trim());
+        hideOrderFeedback();
         return true;
       }
 
@@ -604,13 +597,12 @@
       document.querySelectorAll('.preset-route').forEach(b => b.addEventListener('click', () => { setPoint('pickup', b.dataset.pLat, b.dataset.pLng, b.dataset.pName, false); setPoint('dropoff', b.dataset.dLat, b.dataset.dLng, b.dataset.dName, false); }));
       document.querySelectorAll('input[name="service-type"], input[name="payment-method"]').forEach(r => r.addEventListener('change', calculateFare));
 
-      el.btnGpsPickup.addEventListener('click', () => {
-        if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { setPoint('pickup', pos.coords.latitude, pos.coords.longitude, null, true); map.flyTo([pos.coords.latitude, pos.coords.longitude], 15); });
-      });
+      el.btnGpsPickup.addEventListener('click', () => { if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { setPoint('pickup', pos.coords.latitude, pos.coords.longitude, null, true); map.flyTo([pos.coords.latitude, pos.coords.longitude], 15); }); });
       el.btnGpsCenter.addEventListener('click', () => { if (state.deviceGps) map.flyTo([state.deviceGps.lat, state.deviceGps.lng], 15); });
       el.btnCenterBws.addEventListener('click', () => map.flyTo(C.BONDOWOSO_CENTER, C.BONDOWOSO_ZOOM));
 
       el.btnPrimary.addEventListener('click', () => {
+        if (state.isSubmitting || state.activeOrderId) return;
         if (!validate()) return;
         if (state.lastCalc.paymentMethod === 'QRIS') openQris();
         else if (sb) createRealtimeOrder(false); else sendOrderWa(false);
@@ -620,15 +612,17 @@
       el.btnConfirmQrisWa.addEventListener('click', () => { el.qrisModal.classList.add('hidden'); if (sb) createRealtimeOrder(true); else sendOrderWa(true); });
       el.btnFallbackWa.addEventListener('click', () => sendOrderWa(state.lastCalc.paymentMethod === 'QRIS'));
       el.btnCancelLive.addEventListener('click', async () => {
-        if (sb && state.activeOrderId && confirm('Batalkan pencarian driver?')) {
+        if (sb && state.activeOrderId && confirm('Batalkan pesanan ini?')) {
           await sb.from('orders').update({ status: 'cancelled' }).eq('id', state.activeOrderId);
           el.liveCard.classList.add('hidden'); localStorage.removeItem(KEYS.ACTIVE_ORDER);
+          state.activeOrderId = null;
+          if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+          hideOrderFeedback(); updatePrimaryButtonUI();
         }
       });
 
-      el.btnReset.addEventListener('click', () => { clearPoint('pickup'); clearPoint('dropoff'); el.orderNote.value = ''; calculateFare(); });
+      el.btnReset.addEventListener('click', () => { clearPoint('pickup'); clearPoint('dropoff'); el.orderNote.value = ''; hideOrderFeedback(); calculateFare(); });
 
-      // Init GPS & Saved Data
       el.paxName.value = localStorage.getItem(KEYS.PAX_NAME) || '';
       el.paxPhone.value = localStorage.getItem(KEYS.PAX_PHONE) || '';
       setMapMode('pickup'); renderRecent(); calculateFare();
@@ -643,7 +637,6 @@
         }, () => { el.gpsText.textContent = 'GPS Nonaktif'; });
       }
 
-      // Restore active order if Supabase enabled
       const savedOrderId = localStorage.getItem(KEYS.ACTIVE_ORDER);
       if (sb && savedOrderId) {
         const { data } = await sb.from('orders').select('*').eq('id', savedOrderId).single();
