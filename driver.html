@@ -37,41 +37,85 @@
         <p id="pin-incoming-hint" class="hidden mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5"></p>
       </div>
       <div class="space-y-2.5">
-        <input id="login-phone" type="tel" inputmode="tel" placeholder="No. HP Driver (Wajib jika mode Real-Time)" class="hidden w-full text-center text-sm font-semibold px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300" />
+        <input id="login-phone" type="tel" inputmode="tel" placeholder="No. HP Driver (Opsional jika pakai PIN Default)" class="hidden w-full text-center text-sm font-semibold px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300" />
         <input id="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="PIN Driver (Default: 1234)" class="w-full text-center tracking-widest text-base font-bold px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         <p id="pin-error" class="hidden text-xs font-semibold text-rose-600">No. HP atau PIN salah.</p>
       </div>
-      <button id="btn-unlock-pin" type="button" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">Masuk Aplikasi Driver</button>
+      <button id="btn-unlock-pin" type="button" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">Masuk &amp; Aktifkan Notifikasi</button>
       <a href="./index.html" class="block text-xs text-slate-400 hover:text-emerald-700">← Kembali ke Halaman Penumpang</a>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP NOTIFIKASI ORDER BARU MASUK -->
+  <div id="new-order-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border-4 border-blue-500 overflow-hidden animate-bounce-once">
+      <div class="bg-blue-600 px-5 py-3.5 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-white animate-ping"></span>
+          <span class="text-sm font-extrabold uppercase tracking-wide">🔔 Order Baru Masuk!</span>
+        </div>
+        <button id="btn-close-new-order" type="button" class="text-white/80 hover:text-white font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-3 text-sm">
+        <div>
+          <p id="modal-ord-pax" class="text-base font-extrabold text-slate-900">-</p>
+          <p id="modal-ord-svc" class="text-xs font-semibold text-blue-700">-</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-1.5 text-xs">
+          <p><strong class="text-emerald-700">Jemput:</strong> <span id="modal-ord-pick">-</span></p>
+          <p><strong class="text-rose-600">Tujuan:</strong> <span id="modal-ord-drop">-</span></p>
+          <p id="modal-ord-note" class="hidden text-amber-800 bg-amber-50 px-2 py-1 rounded">Catatan: -</p>
+        </div>
+        <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5">
+          <span class="text-xs font-semibold text-emerald-800">Estimasi Tagihan (<span id="modal-ord-pay">Tunai</span>)</span>
+          <span id="modal-ord-fare" class="text-xl font-extrabold text-emerald-700">Rp0</span>
+        </div>
+        <p id="modal-ord-gps-warn" class="hidden text-xs font-semibold text-rose-600 text-center">🔒 Aktifkan GPS HP Anda terlebih dahulu untuk mengambil order.</p>
+        <div class="grid grid-cols-3 gap-2 pt-1">
+          <button id="btn-modal-ignore" type="button" class="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs">Nanti</button>
+          <button id="btn-modal-claim" type="button" class="col-span-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold text-sm shadow-md">
+            🚗 Ambil Order Sekarang
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Header -->
   <header class="bg-emerald-900 text-white sticky top-0 z-40 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm">DRV</div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0">DRV</div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold leading-tight">Ayo Jalan <span class="text-emerald-300">Driver</span></h1>
+          <h1 class="text-sm sm:text-base font-bold leading-tight">Ayo Jalan <span class="text-emerald-300">Driver</span></h1>
           <p class="text-[11px] text-emerald-200"><span id="gps-live-text">Mencari GPS...</span> • <span id="wakelock-badge">Layar: Normal</span></p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="btn-open-profile" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-700">Rekening</button>
-        <button id="btn-reset-all" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white">Reset</button>
+      <div class="flex items-center gap-1.5">
+        <button id="btn-test-sound" type="button" title="Aktifkan/Tes Suara & Notifikasi" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">🔔 Tes Bel</button>
+        <button id="btn-open-profile" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-700">Rekening</button>
+        <button id="btn-reset-all" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white">Reset</button>
       </div>
     </div>
   </header>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- RADAR ORDER REAL-TIME -->
+    <!-- RADAR ORDER REAL-TIME (SELALU TAMPIL JIKA SUPABASE TERHUBUNG) -->
     <div id="realtime-radar-box" class="hidden mb-4 bg-blue-50 border-2 border-blue-500 rounded-2xl p-4 shadow-md space-y-2.5">
-      <div class="flex items-center justify-between">
-        <p class="text-xs font-extrabold uppercase text-blue-800 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span> Order Masuk Real-Time</p>
-        <span id="radar-gps-warning" class="text-[11px] text-blue-700 font-semibold">Siapa cepat dia dapat</span>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="text-xs font-extrabold uppercase text-blue-800 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span>
+          Radar Order Masuk Real-Time
+        </p>
+        <div class="flex items-center gap-2">
+          <span id="radar-gps-warning" class="text-[11px] text-blue-700 font-semibold">Menunggu order...</span>
+          <button id="btn-refresh-radar" type="button" class="text-[11px] font-bold bg-white hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg">🔄 Cek Order</button>
+        </div>
       </div>
-      <div id="realtime-orders-list" class="space-y-2"></div>
+      <div id="realtime-orders-list" class="space-y-2">
+        <p class="text-xs text-blue-700/80 text-center py-2">Belum ada order masuk saat ini. Radar otomatis mengecek setiap 4 detik.</p>
+      </div>
     </div>
 
     <!-- BANNER INFO PENUMPANG AKTIF -->
@@ -128,7 +172,6 @@
             <div id="map-loading" class="hidden absolute inset-2 rounded-xl bg-white/60 z-30 flex items-center justify-center"><div class="bg-white px-4 py-2 rounded-xl shadow-md text-xs font-semibold text-emerald-800">Menghitung rute...</div></div>
           </div>
 
-          <!-- PANEL AKSI TAHAP ORDER DENGAN KUNCI GEOFENCE GPS -->
           <div class="px-4 py-3.5 bg-slate-50 border-t border-slate-200 space-y-2.5">
             <div class="flex items-center justify-between text-[11px] font-bold px-1">
               <span id="step-dot-1" class="text-emerald-700">1. Ambil Order</span><span class="text-slate-300">→</span>
@@ -137,7 +180,6 @@
               <span id="step-dot-4" class="text-slate-400">4. Bayar</span>
             </div>
 
-            <!-- Panel Idle -->
             <div id="stage-panel-idle" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p class="text-xs font-bold">Siap Menjalankan Order</p>
@@ -149,7 +191,6 @@
               </button>
             </div>
 
-            <!-- Panel Menuju Jemput (Terkunci jika > 200m dari Titik Jemput) -->
             <div id="stage-panel-pickup" class="hidden space-y-2">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -164,12 +205,9 @@
                   </button>
                 </div>
               </div>
-              <div class="text-right">
-                <button id="btn-override-pickup" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button>
-              </div>
+              <div class="text-right"><button id="btn-override-pickup" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button></div>
             </div>
 
-            <!-- Panel Menuju Tujuan (Terkunci jika > 200m dari Titik Tujuan) -->
             <div id="stage-panel-dropoff" class="hidden space-y-2">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -181,12 +219,9 @@
                   🔒 Sudah Sampai Tujuan
                 </button>
               </div>
-              <div class="text-right">
-                <button id="btn-override-dropoff" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button>
-              </div>
+              <div class="text-right"><button id="btn-override-dropoff" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button></div>
             </div>
 
-            <!-- Panel Sudah Sampai & Transaksi -->
             <div id="stage-panel-arrived" class="hidden space-y-3">
               <div class="flex items-center justify-between bg-emerald-100/70 border border-emerald-300 rounded-xl px-3.5 py-2.5">
                 <div><p class="text-xs font-bold text-emerald-900">🏁 Sudah Sampai Tujuan!</p><p class="text-[11px] text-emerald-800">Pilih transaksi pembayaran penumpang:</p></div>
@@ -339,6 +374,7 @@
         deviceGps: null, deviceGpsMarker: null, followGps: true, voiceEnabled: true,
         gpsOverridePickup: false, gpsOverrideDropoff: false,
         wakeLock: null, navCoords: [], navSteps: [], navStepIdx: 0, lastNavFetchTime: 0, lastSpokenKey: '',
+        knownPendingIds: new Set(), firstRadarLoaded: false, pendingModalOrder: null, radarPollTimer: null,
         walletBalance: 0, lastCalc: {}, searchAbort: { pickup: null, dropoff: null }
       };
 
@@ -346,8 +382,16 @@
         pinLock: document.getElementById('pin-lock-screen'), loginPhone: document.getElementById('login-phone'),
         pinHint: document.getElementById('pin-incoming-hint'), pinInput: document.getElementById('pin-input'),
         pinErr: document.getElementById('pin-error'), btnUnlock: document.getElementById('btn-unlock-pin'),
+        btnTestSound: document.getElementById('btn-test-sound'),
+        newOrdModal: document.getElementById('new-order-modal'), btnCloseNewOrd: document.getElementById('btn-close-new-order'),
+        mOrdPax: document.getElementById('modal-ord-pax'), mOrdSvc: document.getElementById('modal-ord-svc'),
+        mOrdPick: document.getElementById('modal-ord-pick'), mOrdDrop: document.getElementById('modal-ord-drop'),
+        mOrdNote: document.getElementById('modal-ord-note'), mOrdPay: document.getElementById('modal-ord-pay'),
+        mOrdFare: document.getElementById('modal-ord-fare'), mOrdGpsWarn: document.getElementById('modal-ord-gps-warn'),
+        btnModalIgnore: document.getElementById('btn-modal-ignore'), btnModalClaim: document.getElementById('btn-modal-claim'),
         gpsText: document.getElementById('gps-live-text'), wakeBadge: document.getElementById('wakelock-badge'),
-        radarBox: document.getElementById('realtime-radar-box'), radarWarn: document.getElementById('radar-gps-warning'), radarList: document.getElementById('realtime-orders-list'),
+        radarBox: document.getElementById('realtime-radar-box'), radarWarn: document.getElementById('radar-gps-warning'),
+        btnRefreshRadar: document.getElementById('btn-refresh-radar'), radarList: document.getElementById('realtime-orders-list'),
         inBanner: document.getElementById('incoming-order-banner'), inTitle: document.getElementById('incoming-pax-title'),
         inMeta: document.getElementById('incoming-pax-meta'), btnWaPax: document.getElementById('btn-wa-pax'),
         btnCallPax: document.getElementById('btn-call-pax'), btnDismissBanner: document.getElementById('btn-dismiss-banner'),
@@ -391,7 +435,19 @@
         inDrvName: document.getElementById('input-driver-name'), inBank: document.getElementById('input-payout-bank'), inAccNum: document.getElementById('input-payout-number'), inAccHold: document.getElementById('input-payout-holder')
       };
 
-      if (sb) el.loginPhone.classList.remove('hidden');
+      if (sb) {
+        el.loginPhone.classList.remove('hidden');
+        el.radarBox.classList.remove('hidden');
+      }
+
+      // Buka kunci audio pada interaksi pertama di halaman
+      document.addEventListener('click', () => C.unlockAudio(), { once: true });
+      el.btnTestSound.addEventListener('click', () => {
+        C.unlockAudio();
+        C.playOrderChime();
+        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      });
 
       function haversineM(lat1, lng1, lat2, lng2) {
         const R = 6371000, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
@@ -399,124 +455,81 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       }
 
-      // === VALIDASI KETAT TITIK GPS TERHADAP TOMBOL JEMPUT, SAMPAI & BAYAR ===
       function updateGeofenceButtons() {
-        const hasGps = !!state.deviceGps;
-        const hasRoute = !!(state.pickup && state.dropoff);
+        const hasGps = !!state.deviceGps, hasRoute = !!(state.pickup && state.dropoff);
+        el.btnStartNav.disabled = !(hasGps && hasRoute);
 
-        // 1. Tombol Ambil Order (Wajib GPS aktif + Rute lengkap)
-        const canStart = hasGps && hasRoute;
-        el.btnStartNav.disabled = !canStart;
         if (!hasGps) {
           el.idleGpsReq.textContent = '🔒 Aktifkan GPS HP Anda untuk mengambil order & navigasi.';
-          el.radarWarn.textContent = '🔒 Aktifkan GPS untuk ambil order';
+          el.radarWarn.textContent = '🔒 GPS Mati';
         } else if (!hasRoute) {
           el.idleGpsReq.textContent = '';
-          el.radarWarn.textContent = 'GPS Aktif • Siapa cepat dia dapat';
+          el.radarWarn.textContent = 'GPS Aktif • Pantau Real-Time';
         } else {
-          el.idleGpsReq.textContent = `✓ GPS Aktif. Siap navigasi ke titik jemput.`;
+          el.idleGpsReq.textContent = '✓ GPS Aktif. Siap navigasi ke titik jemput.';
           el.idleGpsReq.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
         }
 
-        // Update tombol di Radar Real-Time jika ada
         el.radarList.querySelectorAll('.btn-claim-order').forEach(btn => {
           btn.disabled = !hasGps;
           btn.textContent = hasGps ? 'Ambil Order' : '🔒 GPS Mati';
         });
 
-        // 2. Tombol Jemput Penumpang (Wajib GPS <= 200m dari Titik Jemput)
+        // Update tombol modal notifikasi juga
+        el.btnModalClaim.disabled = !hasGps;
+        el.mOrdGpsWarn.classList.toggle('hidden', hasGps);
+
         if (state.pickup) {
           if (state.gpsOverridePickup) {
-            el.btnConfirmPick.disabled = false;
-            el.btnConfirmPick.textContent = '✓ Jemput Penumpang';
-            el.pickGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.';
-            el.pickGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
+            el.btnConfirmPick.disabled = false; el.btnConfirmPick.textContent = '✓ Jemput Penumpang';
+            el.pickGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.'; el.pickGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
           } else if (!hasGps) {
-            el.btnConfirmPick.disabled = true;
-            el.btnConfirmPick.textContent = '🔒 Jemput Penumpang';
-            el.pickGeoInfo.textContent = '🔒 GPS tidak aktif. Tidak dapat verifikasi posisi jemput.';
-            el.pickGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
+            el.btnConfirmPick.disabled = true; el.btnConfirmPick.textContent = '🔒 Jemput Penumpang';
+            el.pickGeoInfo.textContent = '🔒 GPS tidak aktif.'; el.pickGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
           } else {
-            const distPick = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.pickup.lat, state.pickup.lng);
-            const inRange = distPick <= RADIUS_M;
-            el.btnConfirmPick.disabled = !inRange;
-            el.btnConfirmPick.textContent = inRange ? '✓ Jemput Penumpang' : '🔒 Jemput Penumpang';
-            const distStr = distPick >= 1000 ? `${(distPick / 1000).toFixed(2)} km` : `${Math.round(distPick)} m`;
-            el.pickGeoInfo.textContent = inRange
-              ? `✓ Anda di titik jemput (${distStr}). Silakan klik Jemput!`
-              : `🔒 Jarak ke titik jemput: ${distStr} (Aktif otomatis saat ≤ ${RADIUS_M} m)`;
-            el.pickGeoInfo.className = `text-[11px] font-semibold mt-0.5 ${inRange ? 'text-emerald-700' : 'text-amber-700'}`;
+            const d = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.pickup.lat, state.pickup.lng);
+            const ok = d <= RADIUS_M;
+            el.btnConfirmPick.disabled = !ok; el.btnConfirmPick.textContent = ok ? '✓ Jemput Penumpang' : '🔒 Jemput Penumpang';
+            el.pickGeoInfo.textContent = ok ? `✓ Di titik jemput (${Math.round(d)} m).` : `🔒 Jarak ke jemput: ${d >= 1000 ? (d/1000).toFixed(2)+' km' : Math.round(d)+' m'} (Aktif ≤ ${RADIUS_M} m)`;
+            el.pickGeoInfo.className = `text-[11px] font-semibold mt-0.5 ${ok ? 'text-emerald-700' : 'text-amber-700'}`;
           }
         }
 
-        // 3. Tombol Sudah Sampai Tujuan (Wajib GPS <= 200m dari Titik Tujuan)
         let atDropoff = false;
         if (state.dropoff) {
           if (state.gpsOverrideDropoff) {
-            atDropoff = true;
-            el.btnConfirmArr.disabled = false;
-            el.btnConfirmArr.textContent = '🏁 Sudah Sampai Tujuan';
-            el.dropGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.';
-            el.dropGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
+            atDropoff = true; el.btnConfirmArr.disabled = false; el.btnConfirmArr.textContent = '🏁 Sudah Sampai Tujuan';
+            el.dropGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.'; el.dropGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
           } else if (!hasGps) {
-            el.btnConfirmArr.disabled = true;
-            el.btnConfirmArr.textContent = '🔒 Sudah Sampai Tujuan';
-            el.dropGeoInfo.textContent = '🔒 GPS tidak aktif. Tidak dapat verifikasi lokasi tujuan.';
-            el.dropGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
+            el.btnConfirmArr.disabled = true; el.btnConfirmArr.textContent = '🔒 Sudah Sampai Tujuan';
+            el.dropGeoInfo.textContent = '🔒 GPS tidak aktif.'; el.dropGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
           } else {
-            const distDrop = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.dropoff.lat, state.dropoff.lng);
-            atDropoff = distDrop <= RADIUS_M;
-            el.btnConfirmArr.disabled = !atDropoff;
-            el.btnConfirmArr.textContent = atDropoff ? '🏁 Sudah Sampai Tujuan' : '🔒 Sudah Sampai Tujuan';
-            const distStr = distDrop >= 1000 ? `${(distDrop / 1000).toFixed(2)} km` : `${Math.round(distDrop)} m`;
-            el.dropGeoInfo.textContent = atDropoff
-              ? `✓ Anda sudah tiba di tujuan (${distStr}). Klik Sudah Sampai!`
-              : `🔒 Jarak ke tujuan: ${distStr} (Aktif otomatis saat ≤ ${RADIUS_M} m)`;
+            const d = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.dropoff.lat, state.dropoff.lng);
+            atDropoff = d <= RADIUS_M;
+            el.btnConfirmArr.disabled = !atDropoff; el.btnConfirmArr.textContent = atDropoff ? '🏁 Sudah Sampai Tujuan' : '🔒 Sudah Sampai Tujuan';
+            el.dropGeoInfo.textContent = atDropoff ? `✓ Tiba di tujuan (${Math.round(d)} m).` : `🔒 Jarak ke tujuan: ${d >= 1000 ? (d/1000).toFixed(2)+' km' : Math.round(d)+' m'} (Aktif ≤ ${RADIUS_M} m)`;
             el.dropGeoInfo.className = `text-[11px] font-semibold mt-0.5 ${atDropoff ? 'text-emerald-700' : 'text-amber-700'}`;
           }
         }
 
-        // 4. Tombol Kasir (Bayar QRIS / Catat Trip Tunai)
         const canPay = (state.tripStage === 'arrived') || (state.tripStage === 'idle' && atDropoff && state.lastCalc.totalFare > 0);
-        el.btnQris.disabled = !canPay;
-        el.btnSaveTrip.disabled = !canPay;
-        if (canPay) {
-          el.kasirLockNote.textContent = '✓ Anda berada di titik tujuan. Transaksi pembayaran siap diproses.';
-          el.kasirLockNote.className = 'text-[11px] font-semibold text-emerald-700';
-        } else {
-          el.kasirLockNote.textContent = `🔒 Transaksi kasir terkunci sampai GPS tiba di tujuan (≤ ${RADIUS_M} m) & klik "Sudah Sampai".`;
-          el.kasirLockNote.className = 'text-[11px] font-semibold text-amber-700';
-        }
+        el.btnQris.disabled = !canPay; el.btnSaveTrip.disabled = !canPay;
+        el.kasirLockNote.textContent = canPay ? '✓ Di titik tujuan. Transaksi pembayaran siap diproses.' : `🔒 Kasir terkunci sampai GPS tiba di tujuan (≤ ${RADIUS_M} m) & klik "Sudah Sampai".`;
+        el.kasirLockNote.className = `text-[11px] font-semibold ${canPay ? 'text-emerald-700' : 'text-amber-700'}`;
       }
 
-      // Override Darurat (Khusus PIN Admin) jika sinyal GPS gunung bermasalah
-      el.btnOverridePick.addEventListener('click', () => {
-        const pin = prompt('Masukkan PIN Admin untuk buka paksa tombol Jemput:');
-        if (pin === CFG.ADMIN_PIN) { state.gpsOverridePickup = true; updateGeofenceButtons(); }
-        else if (pin !== null) alert('PIN Admin salah.');
-      });
-      el.btnOverrideDrop.addEventListener('click', () => {
-        const pin = prompt('Masukkan PIN Admin untuk buka paksa tombol Sudah Sampai:');
-        if (pin === CFG.ADMIN_PIN) { state.gpsOverrideDropoff = true; updateGeofenceButtons(); }
-        else if (pin !== null) alert('PIN Admin salah.');
-      });
+      el.btnOverridePick.addEventListener('click', () => { const p = prompt('PIN Admin untuk buka paksa Jemput:'); if (p === CFG.ADMIN_PIN) { state.gpsOverridePickup = true; updateGeofenceButtons(); } else if (p !== null) alert('PIN Admin salah.'); });
+      el.btnOverrideDrop.addEventListener('click', () => { const p = prompt('PIN Admin untuk buka paksa Sudah Sampai:'); if (p === CFG.ADMIN_PIN) { state.gpsOverrideDropoff = true; updateGeofenceButtons(); } else if (p !== null) alert('PIN Admin salah.'); });
 
-      // === SCREEN WAKE LOCK ===
-      async function manageWakeLock(keepAwake) {
+      async function manageWakeLock(keep) {
         if (!('wakeLock' in navigator)) return;
         try {
-          if (keepAwake && !state.wakeLock) {
-            state.wakeLock = await navigator.wakeLock.request('screen');
-            el.wakeBadge.textContent = 'Layar: Anti-Mati';
-            state.wakeLock.addEventListener('release', () => { state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal'; });
-          } else if (!keepAwake && state.wakeLock) {
-            await state.wakeLock.release(); state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal';
-          }
+          if (keep && !state.wakeLock) { state.wakeLock = await navigator.wakeLock.request('screen'); el.wakeBadge.textContent = 'Layar: Anti-Mati'; state.wakeLock.addEventListener('release', () => { state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal'; }); }
+          else if (!keep && state.wakeLock) { await state.wakeLock.release(); state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal'; }
         } catch {}
       }
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff')) manageWakeLock(true); });
 
-      // === PETA & NAVIGASI ===
       const map = L.map('map', { center: C.BONDOWOSO_CENTER, zoom: C.BONDOWOSO_ZOOM });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
       map.on('dragstart', () => { if (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff') { state.followGps = false; updateFollowUI(); } });
@@ -544,9 +557,9 @@
         let act = 'Lurus terus', icon = 'straight';
         if (type === 'depart') act = 'Mulai jalan';
         else if (type === 'arrive') return { text: state.tripStage === 'to_pickup' ? 'Tiba di Titik Jemput' : 'Tiba di Titik Tujuan', icon: 'flag' };
-        else if (type === 'roundabout' || type === 'rotary') { act = `Bundaran, ambil keluar ke-${exit || 1}`; icon = 'roundabout'; }
-        else if (modifier === 'left' || modifier === 'slight left' || modifier === 'sharp left') { act = modifier === 'sharp left' ? 'Belok tajam ke kiri' : 'Belok kiri'; icon = 'left'; }
-        else if (modifier === 'right' || modifier === 'slight right' || modifier === 'sharp right') { act = modifier === 'sharp right' ? 'Belok tajam ke kanan' : 'Belok kanan'; icon = 'right'; }
+        else if (type === 'roundabout' || type === 'rotary') { act = `Bundaran, keluar ke-${exit || 1}`; icon = 'roundabout'; }
+        else if (modifier && modifier.includes('left')) { act = 'Belok kiri'; icon = 'left'; }
+        else if (modifier && modifier.includes('right')) { act = 'Belok kanan'; icon = 'right'; }
         else if (modifier === 'uturn') { act = 'Putar balik'; icon = 'uturn'; }
         return { text: `${act}${road}`, icon };
       }
@@ -615,7 +628,6 @@
           const cur = state.navSteps[state.navStepIdx], loc = cur.maneuver && cur.maneuver.location;
           if (loc && haversineM(origin.lat, origin.lng, loc[1], loc[0]) < 30) state.navStepIdx++; else break;
         }
-
         const step = state.navSteps[state.navStepIdx] || state.navSteps[0];
         if (step) {
           const loc = step.maneuver && step.maneuver.location, dist = loc ? haversineM(origin.lat, origin.lng, loc[1], loc[0]) : (step.distance || 0);
@@ -734,17 +746,75 @@
         setPoint('pickup', plat, plng, pname, false); setPoint('dropoff', dlat, dlng, dname, false); calculateFare();
       }
 
+      // =========================================================================
+      // NOTIFIKASI & RADAR ORDER REAL-TIME + POLLING CADANGAN 4 DETIK
+      // =========================================================================
+      function triggerIncomingOrderAlert(order) {
+        C.playOrderChime();
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 400]);
+
+        // Browser Push / System Notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification(`🔔 Order Baru: ${order.passenger_name}`, {
+              body: `${order.pickup_name} → ${order.dropoff_name} (${C.formatIDR(order.total_fare)})`
+            });
+          } catch {}
+        }
+
+        // Pop-up Modal Tengah Layar (hanya jika driver belum sedang mengantar order lain)
+        if (state.tripStage === 'idle') {
+          state.pendingModalOrder = order;
+          el.mOrdPax.textContent = `Penumpang: ${order.passenger_name}`;
+          el.mOrdSvc.textContent = `${order.service_label} • Jarak ${order.distance_km} km`;
+          el.mOrdPick.textContent = order.pickup_name;
+          el.mOrdDrop.textContent = order.dropoff_name;
+          el.mOrdPay.textContent = order.payment_method;
+          el.mOrdFare.textContent = C.formatIDR(order.total_fare);
+          if (order.note) { el.mOrdNote.textContent = `Catatan: ${order.note}`; el.mOrdNote.classList.remove('hidden'); }
+          else el.mOrdNote.classList.add('hidden');
+          el.newOrdModal.classList.remove('hidden');
+          updateGeofenceButtons();
+        }
+      }
+
       async function loadPendingOrders() {
         if (!sb) return;
-        const { data } = await sb.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-        renderPendingOrders(data || []);
+        const { data, error } = await sb.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+        if (error) return;
+        const list = data || [];
+
+        // Cek apakah ada order pending BARU yang belum pernah dilihat sebelumnya
+        let newestNewOrder = null;
+        const currentIds = new Set();
+        list.forEach(o => {
+          currentIds.add(o.id);
+          if (!state.knownPendingIds.has(o.id)) {
+            if (state.firstRadarLoaded) newestNewOrder = o;
+          }
+        });
+        state.knownPendingIds = currentIds;
+
+        // Jika baru pertama kali buka halaman & sudah ada order pending, bunyikan notifikasi juga!
+        if (!state.firstRadarLoaded && list.length > 0 && state.tripStage === 'idle') {
+          newestNewOrder = list[0];
+        }
+        state.firstRadarLoaded = true;
+
+        renderPendingOrders(list);
+        if (newestNewOrder) triggerIncomingOrderAlert(newestNewOrder);
       }
 
       function renderPendingOrders(list) {
-        el.radarBox.classList.toggle('hidden', !list.length); el.radarList.innerHTML = '';
+        el.radarList.innerHTML = '';
+        if (!list.length) {
+          el.radarList.innerHTML = `<p class="text-xs text-blue-700/80 text-center py-2">Belum ada order masuk saat ini. Radar otomatis mengecek setiap 4 detik.</p>`;
+          updateGeofenceButtons();
+          return;
+        }
         list.forEach(o => {
           const card = document.createElement('div');
-          card.className = 'bg-white rounded-xl p-3 border border-blue-200 flex flex-wrap items-center justify-between gap-2 text-xs';
+          card.className = 'bg-white rounded-xl p-3 border border-blue-200 flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs';
           card.innerHTML = `<div><p class="font-bold text-slate-900">${C.escapeHtml(o.passenger_name)} • ${C.escapeHtml(o.service_label)} (${o.distance_km} km)</p><p class="text-[11px] text-slate-600">${C.escapeHtml(o.pickup_name)} → ${C.escapeHtml(o.dropoff_name)}</p><p class="text-[11px] font-bold text-emerald-700">Tagihan: ${C.formatIDR(o.total_fare)} (${o.payment_method})</p></div>
             <button type="button" class="btn-claim-order px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold">Ambil Order</button>`;
           card.querySelector('.btn-claim-order').addEventListener('click', () => claimRealtimeOrder(o));
@@ -755,14 +825,16 @@
 
       async function claimRealtimeOrder(o) {
         if (!state.deviceGps) return alert('GPS HP Anda harus aktif sebelum mengambil order.');
+        el.newOrdModal.classList.add('hidden');
         const p = getProfile(), drvName = p.driverName || 'Mitra Ayo Jalan';
         const { data, error } = await sb.from('orders').update({
           status: 'to_pickup', driver_id: state.driverId, driver_name: drvName,
           driver_lat: state.deviceGps.lat, driver_lng: state.deviceGps.lng
         }).eq('id', o.id).eq('status', 'pending').select().single();
 
-        if (error || !data) { alert('Order sudah diambil driver lain.'); loadPendingOrders(); return; }
+        if (error || !data) { alert('Order sudah diambil driver lain atau dibatalkan.'); loadPendingOrders(); return; }
         state.activeOrderId = data.id;
+        state.gpsOverridePickup = false; state.gpsOverrideDropoff = false;
         const rSvc = document.querySelector(`input[name="service-type"][data-code="${data.service_code}"]`); if (rSvc) rSvc.checked = true;
         const rSrg = document.querySelector(`input[name="surge-multiplier"][value="${Number(data.surge_mult).toFixed(1)}"]`); if (rSrg) rSrg.checked = true;
         el.mtnToggle.checked = !!data.is_mountain;
@@ -775,26 +847,39 @@
       function subscribeRealtimeOrders() {
         if (!sb) return;
         loadPendingOrders();
-        sb.channel('driver-radar').on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-          if (payload.eventType === 'INSERT' && payload.new.status === 'pending') C.playOrderChime();
-          loadPendingOrders();
-        }).subscribe();
+        sb.channel('driver-radar')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadPendingOrders())
+          .subscribe();
+        if (state.radarPollTimer) clearInterval(state.radarPollTimer);
+        state.radarPollTimer = setInterval(loadPendingOrders, 4000);
       }
 
+      el.btnRefreshRadar.addEventListener('click', loadPendingOrders);
+      el.btnCloseNewOrd.addEventListener('click', () => el.newOrdModal.classList.add('hidden'));
+      el.btnModalIgnore.addEventListener('click', () => el.newOrdModal.classList.add('hidden'));
+      el.btnModalClaim.addEventListener('click', () => { if (state.pendingModalOrder) claimRealtimeOrder(state.pendingModalOrder); });
+
+      // Login & Unlock Audio + Minta Izin Notifikasi
       if (sessionStorage.getItem(KEYS.UNLOCKED) === '1') { el.pinLock.classList.add('hidden'); if (sb) subscribeRealtimeOrders(); }
       async function tryUnlock() {
+        C.unlockAudio();
+        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+
         const pin = el.pinInput.value.trim();
         if (sb) {
           const phone = C.normalizePhoneWa(el.loginPhone.value);
-          const { data } = await sb.from('drivers').select('*').eq('phone', phone).eq('pin', pin).single();
-          if (data) {
-            state.driverId = data.id; localStorage.setItem(KEYS.DRIVER_ID, data.id);
-            localStorage.setItem(KEYS.PROFILE, JSON.stringify({ driverName: `${data.name} (${data.plate || ''})`, bank: data.bank_name || 'DANA', accountNumber: data.account_number || '', accountHolder: data.account_holder || data.name }));
-            renderProfile(); sessionStorage.setItem(KEYS.UNLOCKED, '1'); el.pinLock.classList.add('hidden');
-            subscribeRealtimeOrders(); setTimeout(() => map.invalidateSize(), 200); return;
+          if (phone.length >= 9) {
+            const { data } = await sb.from('drivers').select('*').eq('phone', phone).eq('pin', pin).single();
+            if (data) {
+              state.driverId = data.id; localStorage.setItem(KEYS.DRIVER_ID, data.id);
+              localStorage.setItem(KEYS.PROFILE, JSON.stringify({ driverName: `${data.name} (${data.plate || ''})`, bank: data.bank_name || 'DANA', accountNumber: data.account_number || '', accountHolder: data.account_holder || data.name }));
+              renderProfile(); sessionStorage.setItem(KEYS.UNLOCKED, '1'); el.pinLock.classList.add('hidden');
+              subscribeRealtimeOrders(); setTimeout(() => map.invalidateSize(), 200); return;
+            }
           }
           if (pin !== CFG.DRIVER_PIN) { el.pinErr.classList.remove('hidden'); return; }
         } else if (pin !== CFG.DRIVER_PIN) { el.pinErr.classList.remove('hidden'); return; }
+
         sessionStorage.setItem(KEYS.UNLOCKED, '1'); el.pinLock.classList.add('hidden');
         if (sb) subscribeRealtimeOrders();
         setTimeout(() => { map.invalidateSize(); if (state.tripRouteLine) map.fitBounds(state.tripRouteLine.getBounds(), { padding: [55, 55] }); }, 200);
@@ -870,11 +955,7 @@
         el.btnFollow.textContent = state.followGps ? '🎯 Mengikuti GPS' : '🎯 Pusatkan GPS';
       }
 
-      el.btnStartNav.addEventListener('click', () => {
-        if (!state.deviceGps) return alert('GPS perangkat belum aktif. Aktifkan lokasi terlebih dahulu.');
-        if (!state.pickup || !state.dropoff) return alert('Pilih titik jemput & tujuan dahulu.');
-        setTripStage('to_pickup');
-      });
+      el.btnStartNav.addEventListener('click', () => { if (!state.deviceGps) return alert('GPS belum aktif.'); if (!state.pickup || !state.dropoff) return alert('Pilih rute dahulu.'); setTripStage('to_pickup'); });
       el.btnCancelNav.addEventListener('click', () => setTripStage('idle'));
       el.btnConfirmPick.addEventListener('click', () => { if (!el.btnConfirmPick.disabled) setTripStage('to_dropoff'); });
       el.btnConfirmArr.addEventListener('click', () => { if (!el.btnConfirmArr.disabled) setTripStage('arrived'); });
@@ -959,7 +1040,6 @@
 
       el.btnReset.addEventListener('click', () => { setTripStage('idle'); clearPoint('pickup'); clearPoint('dropoff'); el.inBanner.classList.add('hidden'); state.isManualDistance = false; el.distIn.value = 0; el.tollIn.value = 0; el.mtnToggle.checked = false; calculateFare(); });
 
-      // Live GPS Watch + Broadcast Real-Time + Cek Geofence Otomatis
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(pos => {
           const { latitude, longitude, accuracy } = pos.coords;
