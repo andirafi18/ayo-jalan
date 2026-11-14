@@ -3,22 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ayo Jalan - Pesan Taksi & Ojek Online Bondowoso</title>
+  <title>Ayo Jalan - Pesan Taksi &amp; Ojek Online Bondowoso</title>
 
-  <!-- PWA Manifest & Theme -->
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#059669" />
-
-  <!-- Dukungan Instalasi di iPhone / iOS (Safari) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Ayo Jalan" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Leaflet CSS & Routing Machine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
@@ -72,7 +66,6 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
@@ -87,9 +80,6 @@
               1. Mau ke Mana Hari Ini?
             </h2>
             <button id="btn-swap-points" type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
               Tukar
             </button>
           </div>
@@ -111,25 +101,12 @@
               <label for="pickup-input" class="block text-xs font-semibold text-slate-600 mb-1">Titik Penjemputan</label>
               <div class="relative flex items-center">
                 <span class="absolute left-3 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100 pointer-events-none"></span>
-                <input
-                  id="pickup-input"
-                  type="text"
-                  autocomplete="off"
-                  placeholder="Ketik lokasi jemput atau klik ikon GPS..."
-                  class="w-full pl-9 pr-16 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
-                />
+                <input id="pickup-input" type="text" autocomplete="off" placeholder="Ketik lokasi jemput atau klik ikon GPS..." class="w-full pl-9 pr-16 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" />
                 <div class="absolute right-2 flex items-center gap-1">
                   <button id="btn-gps-pickup" type="button" title="Jemput di Lokasi Saya" class="p-1.5 text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="3" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2" /></svg>
                   </button>
-                  <button id="btn-clear-pickup" type="button" class="hidden p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <button id="btn-clear-pickup" type="button" class="hidden p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">✕</button>
                 </div>
               </div>
               <ul id="pickup-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
@@ -140,18 +117,8 @@
               <label for="dropoff-input" class="block text-xs font-semibold text-slate-600 mb-1">Titik Tujuan</label>
               <div class="relative flex items-center">
                 <span class="absolute left-3 w-3 h-3 rounded-full bg-rose-500 ring-4 ring-rose-100 pointer-events-none"></span>
-                <input
-                  id="dropoff-input"
-                  type="text"
-                  autocomplete="off"
-                  placeholder="Ketik tujuan di Bondowoso / Jatim..."
-                  class="w-full pl-9 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
-                />
-                <button id="btn-clear-dropoff" type="button" class="hidden absolute right-2 p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <input id="dropoff-input" type="text" autocomplete="off" placeholder="Ketik tujuan di Bondowoso / Jatim..." class="w-full pl-9 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition" />
+                <button id="btn-clear-dropoff" type="button" class="hidden absolute right-2 p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">✕</button>
               </div>
               <ul id="dropoff-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
             </div>
@@ -188,7 +155,6 @@
             <div id="recent-routes-list" class="space-y-1.5"></div>
           </div>
 
-          <!-- Alert Validasi -->
           <div id="route-alert" class="hidden mt-3.5 p-3 rounded-xl text-xs font-medium flex items-start gap-2.5 border">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -197,7 +163,7 @@
           </div>
         </section>
 
-        <!-- Card 2: Pilih Armada (Otomatis & Terkunci Aman) -->
+        <!-- Card 2: Pilih Armada -->
         <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
@@ -210,53 +176,37 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2.5">
-            <!-- Ayo Motor -->
             <label class="cursor-pointer">
               <input type="radio" name="service-type" value="2500" data-label="Ayo Motor (Roda 2)" data-min="8000" data-vehicle="Motor" class="peer sr-only" />
               <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-bold text-slate-800">Ayo Motor</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold">1 Org</span>
-                </div>
+                <div class="flex items-center justify-between mb-1"><span class="text-xs font-bold text-slate-800">Ayo Motor</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold">1 Org</span></div>
                 <p class="text-xs font-bold text-emerald-700">Rp2.500<span class="font-normal text-slate-500">/km</span></p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp8.000</p>
               </div>
             </label>
 
-            <!-- Mobil Hemat -->
             <label class="cursor-pointer">
               <input type="radio" name="service-type" value="3800" data-label="Mobil Hemat" data-min="15000" data-vehicle="Mobil" class="peer sr-only" />
               <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-bold text-slate-800">Mobil Hemat</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">4 Org</span>
-                </div>
+                <div class="flex items-center justify-between mb-1"><span class="text-xs font-bold text-slate-800">Mobil Hemat</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">4 Org</span></div>
                 <p class="text-xs font-bold text-emerald-700">Rp3.800<span class="font-normal text-slate-500">/km</span></p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
               </div>
             </label>
 
-            <!-- Mobil Reguler -->
             <label class="cursor-pointer">
               <input type="radio" name="service-type" value="6000" data-label="Mobil Reguler" data-min="15000" data-vehicle="Mobil" class="peer sr-only" checked />
               <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-bold text-slate-800">Mobil Reguler</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">4 Org</span>
-                </div>
+                <div class="flex items-center justify-between mb-1"><span class="text-xs font-bold text-slate-800">Mobil Reguler</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">4 Org</span></div>
                 <p class="text-xs font-bold text-emerald-700">Rp6.000<span class="font-normal text-slate-500">/km</span></p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
               </div>
             </label>
 
-            <!-- Mobil XL / Prioritas -->
             <label class="cursor-pointer">
               <input type="radio" name="service-type" value="7500" data-label="Mobil XL / Prioritas" data-min="15000" data-vehicle="Mobil" class="peer sr-only" />
               <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-bold text-slate-800">XL / Keluarga</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">6 Org</span>
-                </div>
+                <div class="flex items-center justify-between mb-1"><span class="text-xs font-bold text-slate-800">XL / Keluarga</span><span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">6 Org</span></div>
                 <p class="text-xs font-bold text-emerald-700">Rp7.500<span class="font-normal text-slate-500">/km</span></p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
               </div>
@@ -264,20 +214,14 @@
           </div>
         </section>
 
-        <!-- Card 3: Ringkasan Tarif & Pesan -->
+        <!-- Card 3: Ringkasan Tarif, Data Penumpang & Pesan -->
         <section class="bg-white rounded-2xl border-2 border-emerald-500/30 shadow-md overflow-hidden">
           <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-3.5 text-white flex items-center justify-between">
-            <h2 class="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-              </svg>
-              Estimasi Tarif Resmi
-            </h2>
+            <h2 class="text-sm font-bold uppercase tracking-wider">Estimasi Tarif Resmi</h2>
             <span id="summary-service-badge" class="text-[11px] font-semibold bg-white/20 px-2.5 py-0.5 rounded-full">Mobil Reguler</span>
           </div>
 
           <div class="p-5 space-y-3 text-sm">
-            <!-- Jarak & Waktu (Otomatis dari peta) -->
             <div class="flex items-center justify-between pb-3 border-b border-dashed border-slate-200">
               <div>
                 <p class="text-xs text-slate-500">Jarak Rute &amp; Waktu Tempuh</p>
@@ -293,7 +237,6 @@
               </div>
             </div>
 
-            <!-- Tarif Jarak -->
             <div class="flex items-center justify-between text-slate-700">
               <div>
                 <span>Tarif Perjalanan</span>
@@ -302,24 +245,16 @@
               <span id="sum-base-fare" class="font-semibold">Rp0</span>
             </div>
 
-            <!-- Biaya Jam Sibuk / Malam Otomatis -->
             <div id="row-surge" class="hidden flex items-center justify-between text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg">
-              <span class="flex items-center gap-1.5 text-xs font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span id="sum-surge-label">Jam Sibuk (1.2x)</span>
-              </span>
+              <span id="sum-surge-label" class="text-xs font-medium">Jam Sibuk (1.2x)</span>
               <span id="sum-surge-fee" class="font-semibold text-sm">+Rp0</span>
             </div>
 
-            <!-- Biaya Medan Pegunungan Otomatis -->
             <div id="row-mountain" class="hidden flex items-center justify-between text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
               <span class="text-xs font-medium">Rute Pegunungan Ijen/Argopuro (+20%)</span>
               <span id="sum-mountain-fee" class="font-semibold text-sm">+Rp0</span>
             </div>
 
-            <!-- Biaya Jasa Aplikasi Progresif -->
             <div class="flex items-start justify-between text-slate-700">
               <div>
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -331,7 +266,6 @@
               <span id="sum-platform-fee" class="font-semibold">Rp0</span>
             </div>
 
-            <!-- Total Estimasi Akhir -->
             <div class="pt-3 border-t-2 border-emerald-100 flex items-end justify-between">
               <div>
                 <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Estimasi</p>
@@ -340,46 +274,42 @@
               <p id="sum-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">Rp0</p>
             </div>
 
-            <!-- Pilihan Metode Pembayaran -->
+            <!-- Metode Pembayaran -->
             <div class="pt-3 border-t border-slate-100">
               <label class="block text-xs font-semibold text-slate-600 mb-2">Pilih Metode Pembayaran</label>
               <div class="grid grid-cols-2 gap-2.5">
                 <label class="cursor-pointer">
                   <input type="radio" name="payment-method" value="Tunai" class="peer sr-only" checked />
-                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-xs font-bold text-slate-800">Tunai</p>
-                      <p class="text-[10px] text-slate-500">Bayar ke driver</p>
-                    </div>
+                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800">Tunai</span>
+                    <span class="text-[10px] text-slate-500">(ke driver)</span>
                   </div>
                 </label>
 
                 <label class="cursor-pointer">
                   <input type="radio" name="payment-method" value="QRIS" class="peer sr-only" />
-                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-xs font-bold text-slate-800">QRIS</p>
-                      <p class="text-[10px] text-slate-500">E-Wallet / Bank</p>
-                    </div>
+                  <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800">QRIS</span>
+                    <span class="text-[10px] text-slate-500">(E-Wallet/Bank)</span>
                   </div>
                 </label>
               </div>
             </div>
 
-            <!-- Catatan Penjemputan & Tombol Pesan -->
+            <!-- Nama Penumpang & Catatan -->
             <div class="pt-2 space-y-2.5">
               <div>
-                <label for="order-note" class="block text-[11px] font-semibold text-slate-500 mb-1">Catatan untuk Driver (Opsional)</label>
+                <label for="passenger-name" class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Penumpang <span class="text-rose-500">*</span></label>
+                <input
+                  id="passenger-name"
+                  type="text"
+                  placeholder="Masukkan nama Anda..."
+                  class="w-full px-3 py-2 text-sm font-medium bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+              </div>
+
+              <div>
+                <label for="order-note" class="block text-[11px] font-semibold text-slate-500 mb-1">Catatan Penjemputan (Opsional)</label>
                 <input
                   id="order-note"
                   type="text"
@@ -389,12 +319,6 @@
               </div>
 
               <button id="btn-primary-action" type="button" class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm shadow-sm shadow-emerald-200 transition">
-                <svg id="primary-action-icon-wa" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969S17.547 2 12.031 2zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.531.078-1.203.109-1.938-.125-.453-.141-1.031-.328-1.766-.656-3.094-1.344-5.109-4.484-5.266-4.688-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.313.609-.391.813-.391.203 0 .406 0 .594.016.188.016.438-.078.688.531.25.609.859 2.094.938 2.25.078.156.125.344.031.547-.094.203-.141.344-.297.516-.156.172-.313.391-.453.531-.156.141-.313.297-.141.594.172.297.781 1.281 1.672 2.078 1.156 1.031 2.125 1.344 2.422 1.484.297.141.469.125.641-.078.172-.203.75-.875.953-1.172.203-.297.406-.25.672-.156.266.094 1.703.797 2 .953.297.156.484.219.563.344.078.125.078.734-.172 1.438z"/>
-                </svg>
-                <svg id="primary-action-icon-qris" xmlns="http://www.w3.org/2000/svg" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg>
                 <span id="primary-action-text">Pesan via WhatsApp</span>
               </button>
             </div>
@@ -413,28 +337,20 @@
               <span id="map-hint-text">Klik peta untuk menentukan <strong>Titik Penjemputan</strong></span>
             </div>
 
-            <div id="map-route-badge" class="hidden pointer-events-auto bg-emerald-700/95 backdrop-blur-sm text-white shadow-md px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <div id="map-route-badge" class="hidden pointer-events-auto bg-emerald-700/95 backdrop-blur-sm text-white shadow-md px-3.5 py-2 rounded-xl text-xs font-semibold">
               <span id="map-route-badge-text">0 km • 0 menit</span>
             </div>
           </div>
 
           <div id="map-loading" class="hidden absolute inset-2 rounded-xl bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center">
-            <div class="bg-white px-4 py-2.5 rounded-xl shadow-lg border border-emerald-100 flex items-center gap-2.5 text-xs font-semibold text-emerald-800">
-              <svg class="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+            <div class="bg-white px-4 py-2.5 rounded-xl shadow-lg border border-emerald-100 text-xs font-semibold text-emerald-800">
               Menghitung rute perjalanan...
             </div>
           </div>
 
           <div class="absolute top-5 right-5 z-20 flex items-center gap-2">
-            <button id="btn-gps-center" type="button" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-              GPS Saya
-            </button>
-            <button id="btn-center-bondowoso" type="button" class="bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-              Fokus Bondowoso
-            </button>
+            <button id="btn-gps-center" type="button" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold">GPS Saya</button>
+            <button id="btn-center-bondowoso" type="button" class="bg-white hover:bg-emerald-50 text-slate-700 border border-slate-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold">Fokus Bondowoso</button>
           </div>
         </div>
       </div>
@@ -443,18 +359,14 @@
   </main>
 
   <!-- MODAL PEMBAYARAN QRIS PENUMPANG -->
-  <div id="qris-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="qris-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-3.5 text-white flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="bg-white text-emerald-700 font-black text-xs px-2 py-0.5 rounded">QRIS</span>
           <span class="text-sm font-bold">Pembayaran Ayo Jalan</span>
         </div>
-        <button id="btn-close-qris" type="button" class="text-white/80 hover:text-white p-1 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <button id="btn-close-qris" type="button" class="text-white/80 hover:text-white p-1">✕</button>
       </div>
 
       <div class="p-5 space-y-4 text-center">
@@ -479,10 +391,7 @@
         </div>
 
         <div class="space-y-2 pt-1">
-          <button id="btn-confirm-qris-wa" type="button" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <button id="btn-confirm-qris-wa" type="button" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition">
             Saya Sudah Bayar &amp; Kirim Bukti ke WA
           </button>
           <button id="btn-cancel-qris" type="button" class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition">
@@ -501,7 +410,6 @@
     </div>
   </footer>
 
-  <!-- Leaflet, Routing Machine & QRCodeJS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
@@ -509,7 +417,7 @@
   <script>
     (() => {
       // =========================================================================
-      // KONFIGURASI RESMI OPERATOR (TERKUNCI AMAN UNTUK PENUMPANG)
+      // KONFIGURASI RESMI OPERATOR
       // =========================================================================
       const CONFIG = {
         ADMIN_WA: '6285785068226',          // <-- Ganti dengan No. WA Dispatcher/Admin Anda
@@ -517,11 +425,13 @@
         QRIS_STRING: '00020101021126610014COM.GO-JEK.WWW01189360091438346395280210G8346395280303UMI51440014ID.CO.QRIS.WWW0215ID10265474193030303UMI5204478953033605802ID5925ANDI ARAFIQ, Transportasi6009BONDOWOSO61056826362070703A0163042C9F'                     // <-- Tempel String QRIS statis resmi Anda (000201...)
       };
 
-      const STORAGE_KEYS = { HISTORY: 'ayojalan_user_recent_routes' };
+      const STORAGE_KEYS = {
+        HISTORY: 'ayojalan_user_recent_routes',
+        PASSENGER_NAME: 'ayojalan_passenger_name'
+      };
       const BONDOWOSO_CENTER = [-7.9135, 113.8215];
       const BONDOWOSO_ZOOM = 13;
       const GPS_ZOOM = 15;
-
       const JATIM_BBOX = { minLng: 110.85, minLat: -8.85, maxLng: 115.95, maxLat: -5.75 };
 
       const LOCAL_BONDOWOSO_POIS = [
@@ -537,27 +447,15 @@
       ];
 
       const state = {
-        pickup: null,
-        dropoff: null,
-        activeMapMode: 'pickup',
-        routeDistanceKm: null,
-        routeDurationSec: null,
-        pickupMarker: null,
-        dropoffMarker: null,
-        routingControl: null,
-        deviceGps: null,
-        deviceGpsMarker: null,
-        deviceGpsCircle: null,
-        hasAutoCenteredGps: false,
+        pickup: null, dropoff: null, activeMapMode: 'pickup',
+        routeDistanceKm: null, routeDurationSec: null,
+        pickupMarker: null, dropoffMarker: null, routingControl: null,
+        deviceGps: null, deviceGpsMarker: null, deviceGpsCircle: null, hasAutoCenteredGps: false,
         lastCalc: {
-          serviceLabel: 'Mobil Reguler',
-          surgeLabel: 'Normal',
-          isMountain: false,
-          paymentMethod: 'Tunai',
-          platformFee: 0,
-          totalFare: 0,
-          distanceKm: 0,
-          durationText: '-'
+          serviceValue: '6000', serviceLabel: 'Mobil Reguler',
+          surgeMultiplier: 1.0, surgeLabel: 'Normal (1.0x)',
+          isMountain: false, paymentMethod: 'Tunai',
+          platformFee: 0, totalFare: 0, distanceKm: 0, durationText: '-'
         },
         searchAbortControllers: { pickup: null, dropoff: null }
       };
@@ -600,10 +498,9 @@
         sumPlatformNote: document.getElementById('sum-platform-note'),
         sumPlatformFee: document.getElementById('sum-platform-fee'),
         sumTotal: document.getElementById('sum-total'),
+        passengerName: document.getElementById('passenger-name'),
         orderNote: document.getElementById('order-note'),
         btnPrimaryAction: document.getElementById('btn-primary-action'),
-        primaryActionIconWa: document.getElementById('primary-action-icon-wa'),
-        primaryActionIconQris: document.getElementById('primary-action-icon-qris'),
         primaryActionText: document.getElementById('primary-action-text'),
         qrisModal: document.getElementById('qris-modal'),
         btnCloseQris: document.getElementById('btn-close-qris'),
@@ -621,14 +518,8 @@
         mapLoading: document.getElementById('map-loading')
       };
 
-      // =========================================================================
-      // INISIALISASI PETA & ROUTING
-      // =========================================================================
       const map = L.map('map', { center: BONDOWOSO_CENTER, zoom: BONDOWOSO_ZOOM });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
       function createPinIcon(type) {
         const isPickup = type === 'pickup';
@@ -636,14 +527,7 @@
         const label = isPickup ? 'JEMPUT' : 'TUJUAN';
         return L.divIcon({
           className: 'custom-pin-wrapper',
-          html: `
-            <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);">
-              <span style="background:${bgColor};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;margin-bottom:2px;">${label}</span>
-              <svg width="28" height="34" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3));">
-                <path d="M12 0C5.373 0 0 5.373 0 12C0 20.25 12 30 12 30C12 30 24 20.25 24 12C24 5.373 18.627 0 12 0Z" fill="${bgColor}"/>
-                <circle cx="12" cy="11.5" r="4.5" fill="white"/>
-              </svg>
-            </div>`,
+          html: `<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);"><span style="background:${bgColor};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;margin-bottom:2px;">${label}</span><svg width="28" height="34" viewBox="0 0 24 30" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12C0 20.25 12 30 12 30C12 30 24 20.25 24 12C24 5.373 18.627 0 12 0Z" fill="${bgColor}"/><circle cx="12" cy="11.5" r="4.5" fill="white"/></svg></div>`,
           iconSize: [0, 0], iconAnchor: [0, 0]
         });
       }
@@ -664,10 +548,7 @@
       state.routingControl.on('routesfound', (e) => {
         el.mapLoading.classList.add('hidden');
         const route = e.routes[0];
-        if (!route || !route.summary) {
-          showAlert('Rute jalan raya tidak ditemukan.', 'error');
-          return;
-        }
+        if (!route || !route.summary) return showAlert('Rute jalan raya tidak ditemukan.', 'error');
         const offRoad = (e.waypoints || []).some(wp => wp.distance && wp.distance > 2500);
         state.routeDistanceKm = route.summary.totalDistance / 1000;
         state.routeDurationSec = route.summary.totalTime;
@@ -675,13 +556,9 @@
         el.mapRouteBadge.classList.remove('hidden');
         el.mapRouteBadgeText.textContent = `${state.routeDistanceKm.toFixed(2)} km • ${formatDuration(state.routeDurationSec)}`;
 
-        if (offRoad) {
-          showAlert('Titik berada > 2,5 km dari jalan raya. Rute disesuaikan ke jalan terdekat.', 'warning');
-        } else if (!isWithinJatimBounds(state.pickup.lat, state.pickup.lng) || !isWithinJatimBounds(state.dropoff.lat, state.dropoff.lng)) {
-          showAlert('Peringatan: Salah satu titik di luar batas wilayah operasional Jawa Timur.', 'warning');
-        } else {
-          hideAlert();
-        }
+        if (offRoad) showAlert('Titik berada > 2,5 km dari jalan raya. Rute disesuaikan ke jalan terdekat.', 'warning');
+        else if (!isWithinJatimBounds(state.pickup.lat, state.pickup.lng) || !isWithinJatimBounds(state.dropoff.lat, state.dropoff.lng)) showAlert('Peringatan: Salah satu titik di luar batas wilayah Jawa Timur.', 'warning');
+        else hideAlert();
 
         saveRecentRoute(state.pickup, state.dropoff);
         calculateFare();
@@ -689,31 +566,18 @@
 
       state.routingControl.on('routingerror', () => {
         el.mapLoading.classList.add('hidden');
-        state.routeDistanceKm = null;
-        state.routeDurationSec = null;
+        state.routeDistanceKm = null; state.routeDurationSec = null;
         el.mapRouteBadge.classList.add('hidden');
-        showAlert('Rute tidak ditemukan atau lokasi di luar jangkauan jalan raya. Geser pin ke jalan terdekat.', 'error');
+        showAlert('Rute tidak ditemukan atau di luar jangkauan jalan raya. Geser pin ke jalan terdekat.', 'error');
         calculateFare();
       });
 
-      // =========================================================================
-      // GPS PERANGKAT
-      // =========================================================================
       function updateGpsHeaderBadge(status, text) {
         el.gpsHeaderStatus.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border';
-        if (status === 'active') {
-          el.gpsHeaderStatus.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
-          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-        } else if (status === 'warning') {
-          el.gpsHeaderStatus.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
-          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-amber-500';
-        } else if (status === 'error') {
-          el.gpsHeaderStatus.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
-          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-rose-500';
-        } else {
-          el.gpsHeaderStatus.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
-          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-ping';
-        }
+        if (status === 'active') { el.gpsHeaderStatus.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200'); el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse'; }
+        else if (status === 'warning') { el.gpsHeaderStatus.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200'); el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-amber-500'; }
+        else if (status === 'error') { el.gpsHeaderStatus.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200'); el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-rose-500'; }
+        else { el.gpsHeaderStatus.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200'); el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-ping'; }
         el.gpsHeaderText.textContent = text;
       }
 
@@ -723,77 +587,51 @@
         if (state.deviceGpsCircle) state.deviceGpsCircle.setLatLng([lat, lng]).setRadius(clampedRadius);
         else state.deviceGpsCircle = L.circle([lat, lng], { radius: clampedRadius, color: '#3b82f6', fillColor: '#60a5fa', fillOpacity: 0.15, weight: 1.5 }).addTo(map);
 
-        const popupHtml = `
-          <div style="font-family:inherit;min-width:165px;">
-            <p style="font-weight:700;font-size:12px;color:#1e3a8a;margin:0 0 2px;">Posisi Anda Saat Ini</p>
-            <p style="font-size:11px;color:#475569;margin:0 0 8px;">Akurasi: ±${Math.round(accuracy || 0)} m</p>
-            <button id="popup-use-gps-pickup" type="button" style="width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;">Jemput di Sini</button>
-          </div>`;
-
+        const popupHtml = `<div style="font-family:inherit;min-width:165px;"><p style="font-weight:700;font-size:12px;color:#1e3a8a;margin:0 0 2px;">Posisi Anda Saat Ini</p><p style="font-size:11px;color:#475569;margin:0 0 8px;">Akurasi: ±${Math.round(accuracy || 0)} m</p><button id="popup-use-gps-pickup" type="button" style="width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;">Jemput di Sini</button></div>`;
         if (state.deviceGpsMarker) state.deviceGpsMarker.setLatLng([lat, lng]).setPopupContent(popupHtml);
         else {
           state.deviceGpsMarker = L.marker([lat, lng], { icon: deviceGpsIcon, zIndexOffset: 500 }).addTo(map).bindPopup(popupHtml);
           state.deviceGpsMarker.on('popupopen', () => {
             const btn = document.getElementById('popup-use-gps-pickup');
-            if (btn) btn.addEventListener('click', () => {
-              if (state.deviceGps) { setPoint('pickup', state.deviceGps.lat, state.deviceGps.lng, null, true); state.deviceGpsMarker.closePopup(); }
-            });
+            if (btn) btn.addEventListener('click', () => { if (state.deviceGps) { setPoint('pickup', state.deviceGps.lat, state.deviceGps.lng, null, true); state.deviceGpsMarker.closePopup(); } });
           });
         }
-
         const insideJatim = isWithinJatimBounds(lat, lng);
         updateGpsHeaderBadge(insideJatim ? 'active' : 'warning', insideJatim ? `GPS Aktif (±${Math.round(accuracy || 0)}m)` : 'GPS di Luar Jatim');
         if (shouldCenterMap) map.flyTo([lat, lng], GPS_ZOOM, { duration: 1.0 });
       }
 
       function initDeviceGps() {
-        if (!navigator.geolocation) { updateGpsHeaderBadge('error', 'GPS Tidak Didukung'); return; }
+        if (!navigator.geolocation) return updateGpsHeaderBadge('error', 'GPS Tidak Didukung');
         updateGpsHeaderBadge('loading', 'Mendeteksi GPS...');
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const shouldCenter = !state.hasAutoCenteredGps && !state.pickup && !state.dropoff;
-            state.hasAutoCenteredGps = true;
-            renderDeviceGpsOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, shouldCenter);
-          },
+          (pos) => { const c = !state.hasAutoCenteredGps && !state.pickup && !state.dropoff; state.hasAutoCenteredGps = true; renderDeviceGpsOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, c); },
           () => updateGpsHeaderBadge('error', 'GPS Nonaktif'),
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
         );
       }
 
-      // =========================================================================
-      // ATURAN OTOMATIS PENUMPANG (JAM SIBUK & DETEKSI PEGUNUNGAN)
-      // =========================================================================
       function getAutoSurgeCondition() {
         const now = new Date();
         const totalMin = now.getHours() * 60 + now.getMinutes();
-        // Jam sibuk pagi (06:30-08:30) atau sore (16:00-18:30)
-        if ((totalMin >= 390 && totalMin <= 510) || (totalMin >= 960 && totalMin <= 1110)) {
-          return { multiplier: 1.2, label: 'Jam Sibuk (1.2x)', badge: 'Jam Sibuk • 1.2x' };
-        }
-        // Jam malam (22:00-05:00)
-        if (totalMin >= 1320 || totalMin < 300) {
-          return { multiplier: 1.2, label: 'Tarif Malam (1.2x)', badge: 'Tarif Malam • 1.2x' };
-        }
+        if ((totalMin >= 390 && totalMin <= 510) || (totalMin >= 960 && totalMin <= 1110)) return { multiplier: 1.2, label: 'Jam Sibuk (1.2x)', badge: 'Jam Sibuk • 1.2x' };
+        if (totalMin >= 1320 || totalMin < 300) return { multiplier: 1.2, label: 'Tarif Malam (1.2x)', badge: 'Tarif Malam • 1.2x' };
         return { multiplier: 1.0, label: 'Normal (1.0x)', badge: 'Tarif Normal' };
       }
 
       function detectMountainRoute(pickup, dropoff) {
         const keywords = ['ijen', 'wurung', 'paltuding', 'sempol', 'argopuro', 'kalipait'];
-        const checkPoint = (pt) => {
+        const check = (pt) => {
           if (!pt) return false;
           const lbl = (pt.label || '').toLowerCase();
           if (keywords.some(k => lbl.includes(k))) return true;
-          // Area dataran tinggi Kecamatan Ijen / lereng timur Bondowoso
-          if (pt.lat <= -8.02 && pt.lng >= 114.05) return true;
-          return false;
+          return pt.lat <= -8.02 && pt.lng >= 114.05;
         };
-        return checkPoint(pickup) || checkPoint(dropoff);
+        return check(pickup) || check(dropoff);
       }
 
       function calculateProgressivePlatformFee(distanceKm, baseDistanceFare, vehicleType) {
-        if (distanceKm <= 0 && baseDistanceFare <= 0) {
-          return { fee: 0, pctLabel: 'Hemat', note: 'Tarif ringan, makin jauh % makin kecil' };
-        }
+        if (distanceKm <= 0 && baseDistanceFare <= 0) return { fee: 0, pctLabel: 'Hemat', note: 'Tarif ringan, makin jauh % makin kecil' };
         let pct = 0, minFee = 0, maxFee = 0, tierLabel = '';
         if (vehicleType === 'Motor') {
           maxFee = 5000;
@@ -809,30 +647,16 @@
           else { pct = 0.025; minFee = 4500; tierLabel = '2.5% (Luar Kota)'; }
         }
         const rounded = Math.round((baseDistanceFare * pct) / 500) * 500;
-        const finalFee = Math.min(maxFee, Math.max(minFee, rounded));
-        return {
-          fee: finalFee,
-          pctLabel: tierLabel,
-          note: `Skema hemat ${vehicleType}: makin jauh, % makin ringan`
-        };
+        return { fee: Math.min(maxFee, Math.max(minFee, rounded)), pctLabel: tierLabel, note: `Skema hemat ${vehicleType}: makin jauh, % makin ringan` };
       }
 
-      // =========================================================================
-      // FORMAT & KALKULASI TARIF
-      // =========================================================================
       const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(n));
-
       function formatDuration(sec) {
         if (!sec || sec <= 0) return '-';
-        const m = Math.max(1, Math.round(sec / 60));
-        const h = Math.floor(m / 60), rem = m % 60;
+        const m = Math.max(1, Math.round(sec / 60)), h = Math.floor(m / 60), rem = m % 60;
         return h > 0 ? (rem > 0 ? `${h} jam ${rem} menit` : `${h} jam`) : `${rem} menit`;
       }
-
-      function isWithinJatimBounds(lat, lng) {
-        return lat >= JATIM_BBOX.minLat && lat <= JATIM_BBOX.maxLat && lng >= JATIM_BBOX.minLng && lng <= JATIM_BBOX.maxLng;
-      }
-
+      function isWithinJatimBounds(lat, lng) { return lat >= JATIM_BBOX.minLat && lat <= JATIM_BBOX.maxLat && lng >= JATIM_BBOX.minLng && lng <= JATIM_BBOX.maxLng; }
       function showAlert(msg, type = 'error') {
         el.routeAlert.className = `mt-3.5 p-3 rounded-xl text-xs font-medium flex items-start gap-2.5 border ${type === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`;
         el.routeAlertText.textContent = msg;
@@ -862,12 +686,13 @@
         const mountainFee = isMountain && baseDistanceFare > 0 ? Math.round(baseDistanceFare * 0.20) : 0;
         const platform = calculateProgressivePlatformFee(distanceKm, baseDistanceFare, vehicleType);
         const totalFare = baseDistanceFare + surgeFee + mountainFee + platform.fee;
-
         const durationText = state.routeDurationSec ? formatDuration(state.routeDurationSec) : '-';
 
         state.lastCalc = {
-          serviceLabel, surgeLabel: surge.label, isMountain, paymentMethod,
-          platformFee: platform.fee, totalFare, distanceKm, durationText
+          serviceValue: selectedService.value, serviceLabel,
+          surgeMultiplier: surge.multiplier, surgeLabel: surge.label,
+          isMountain, paymentMethod, platformFee: platform.fee,
+          totalFare, distanceKm, durationText
         };
 
         el.summaryServiceBadge.textContent = serviceLabel;
@@ -881,16 +706,12 @@
           el.rowSurge.classList.remove('hidden');
           el.sumSurgeLabel.textContent = surge.label;
           el.sumSurgeFee.textContent = `+${formatIDR(surgeFee)}`;
-        } else {
-          el.rowSurge.classList.add('hidden');
-        }
+        } else el.rowSurge.classList.add('hidden');
 
         if (isMountain && baseDistanceFare > 0) {
           el.rowMountain.classList.remove('hidden');
           el.sumMountainFee.textContent = `+${formatIDR(mountainFee)}`;
-        } else {
-          el.rowMountain.classList.add('hidden');
-        }
+        } else el.rowMountain.classList.add('hidden');
 
         el.sumPlatformPct.textContent = platform.pctLabel;
         el.sumPlatformNote.textContent = platform.note;
@@ -898,26 +719,19 @@
         el.sumTotal.textContent = formatIDR(totalFare);
 
         if (paymentMethod === 'QRIS') {
-          el.primaryActionIconWa.classList.add('hidden');
-          el.primaryActionIconQris.classList.remove('hidden');
           el.primaryActionText.textContent = 'Bayar & Pesan dengan QRIS';
           el.btnPrimaryAction.className = 'w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm shadow-blue-200 transition';
         } else {
-          el.primaryActionIconWa.classList.remove('hidden');
-          el.primaryActionIconQris.classList.add('hidden');
           el.primaryActionText.textContent = 'Pesan via WhatsApp';
           el.btnPrimaryAction.className = 'w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm shadow-emerald-200 transition';
         }
       }
 
-      // =========================================================================
-      // PENCARIAN & MANAJEMEN TITIK
-      // =========================================================================
       function setMapMode(mode) {
         state.activeMapMode = mode;
         const p = mode === 'pickup';
-        el.modePickupBtn.className = `py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${p ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
-        el.modeDropoffBtn.className = `py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${!p ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
+        el.modePickupBtn.className = `py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${p ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-600'}`;
+        el.modeDropoffBtn.className = `py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${!p ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-600'}`;
         el.mapHintDot.className = `w-2.5 h-2.5 rounded-full shrink-0 ${p ? 'bg-emerald-500' : 'bg-rose-500'}`;
         el.mapHintText.innerHTML = `Klik peta untuk menentukan <strong>${p ? 'Titik Penjemputan' : 'Titik Tujuan'}</strong>`;
       }
@@ -942,10 +756,7 @@
         if (state.pickup && state.dropoff) {
           el.mapLoading.classList.remove('hidden');
           state.routingControl.setWaypoints([L.latLng(state.pickup.lat, state.pickup.lng), L.latLng(state.dropoff.lat, state.dropoff.lng)]);
-        } else {
-          map.panTo([pt.lat, pt.lng]);
-          calculateFare();
-        }
+        } else { map.panTo([pt.lat, pt.lng]); calculateFare(); }
       }
 
       function clearPoint(type) {
@@ -968,8 +779,7 @@
 
       async function reverseGeocode(type, lat, lng) {
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'Accept-Language': 'id' } });
-          if (!res.ok) return;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`, { headers: { 'Accept-Language': 'id' } });
           const data = await res.json();
           if (data && data.display_name) {
             const shortName = data.display_name.split(',').map(s => s.trim()).slice(0, 3).join(', ');
@@ -989,40 +799,29 @@
         const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults;
         listEl.innerHTML = '';
         if (!localItems.length && !osmItems.length && !statusMsg) { listEl.classList.add('hidden'); return; }
-
         localItems.forEach((poi) => {
           const li = document.createElement('li');
           li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
-          li.innerHTML = `<span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">★</span>
-            <div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(poi.name)}</p><p class="text-[11px] text-slate-500 truncate">${escapeHtml(poi.area)}</p></div>`;
+          li.innerHTML = `<span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">★</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(poi.name)}</p><p class="text-[11px] text-slate-500 truncate">${escapeHtml(poi.area)}</p></div>`;
           li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, poi.lat, poi.lng, poi.name, false); });
           listEl.appendChild(li);
         });
-
         osmItems.forEach((item) => {
           const li = document.createElement('li');
           li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
           const parts = item.display_name.split(',');
-          li.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-            <div class="min-w-0"><p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(parts[0])}</p><p class="text-[11px] text-slate-500 truncate">${escapeHtml(parts.slice(1, 4).join(', '))}</p></div>`;
+          li.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg><div class="min-w-0"><p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(parts[0])}</p><p class="text-[11px] text-slate-500 truncate">${escapeHtml(parts.slice(1, 4).join(', '))}</p></div>`;
           li.addEventListener('click', () => { listEl.classList.add('hidden'); setPoint(type, item.lat, item.lon, parts.slice(0, 3).join(', '), false); });
           listEl.appendChild(li);
         });
-
-        if (statusMsg) {
-          const li = document.createElement('li');
-          li.className = 'px-3.5 py-2 text-[11px] text-slate-400 bg-slate-50';
-          li.textContent = statusMsg;
-          listEl.appendChild(li);
-        }
+        if (statusMsg) { const li = document.createElement('li'); li.className = 'px-3.5 py-2 text-[11px] text-slate-400 bg-slate-50'; li.textContent = statusMsg; listEl.appendChild(li); }
         listEl.classList.remove('hidden');
       }
 
       async function searchOsm(type, q, localMatches) {
         if (q.trim().length < 3) return;
         if (state.searchAbortControllers[type]) state.searchAbortControllers[type].abort();
-        const ctrl = new AbortController();
-        state.searchAbortControllers[type] = ctrl;
+        const ctrl = new AbortController(); state.searchAbortControllers[type] = ctrl;
         renderDropdown(type, localMatches, [], 'Mencari alamat lainnya...');
         try {
           const vb = `${JATIM_BBOX.minLng},${JATIM_BBOX.maxLat},${JATIM_BBOX.maxLng},${JATIM_BBOX.minLat}`;
@@ -1030,16 +829,13 @@
           let results = await res.json();
           results.sort((a, b) => ((b.display_name || '').toLowerCase().includes('bondowoso') ? 1 : 0) - ((a.display_name || '').toLowerCase().includes('bondowoso') ? 1 : 0));
           renderDropdown(type, localMatches, results, (!localMatches.length && !results.length) ? 'Lokasi tidak ditemukan. Klik peta langsung.' : '');
-        } catch (err) {
-          if (err.name !== 'AbortError') renderDropdown(type, localMatches, [], '');
-        }
+        } catch (err) { if (err.name !== 'AbortError') renderDropdown(type, localMatches, [], ''); }
       }
 
       const debounce = (fn, d) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), d); }; };
       const debOsmP = debounce((v, l) => searchOsm('pickup', v, l), 400);
       const debOsmD = debounce((v, l) => searchOsm('dropoff', v, l), 400);
 
-      // Riwayat Rute
       function loadRecentRoutes() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '[]'); } catch { return []; } }
       function saveRecentRoute(p, d) {
         if (!p || !d) return;
@@ -1065,7 +861,7 @@
       }
 
       // =========================================================================
-      // QRIS & WHATSAPP ORDER
+      // QRIS & PEMBUATAN LINK KHUSUS DRIVER UNTUK WHATSAPP
       // =========================================================================
       function crc16Ccitt(str) {
         let crc = 0xFFFF;
@@ -1079,13 +875,11 @@
       function buildDynamicQrisString(staticQris, amount) {
         const clean = (staticQris || '').trim();
         if (!clean.startsWith('0002')) return null;
-        const tags = [];
-        let idx = 0;
+        const tags = []; let idx = 0;
         while (idx + 4 <= clean.length) {
           const tag = clean.slice(idx, idx + 2), len = parseInt(clean.slice(idx + 2, idx + 4), 10);
           if (isNaN(len) || idx + 4 + len > clean.length) break;
-          const val = clean.slice(idx + 4, idx + 4 + len);
-          idx += 4 + len;
+          const val = clean.slice(idx + 4, idx + 4 + len); idx += 4 + len;
           if (tag === '63') break;
           tags.push({ tag, val });
         }
@@ -1103,40 +897,93 @@
         el.qrisMerchantName.textContent = CONFIG.MERCHANT_NAME;
         el.qrisModalAmount.textContent = formatIDR(total);
         el.qrisQrCanvas.innerHTML = '';
-
         const dyn = buildDynamicQrisString(CONFIG.QRIS_STRING, total);
         if (typeof QRCode !== 'undefined') {
           const payload = dyn || `AYO-JALAN-BONDOWOSO|TOTAL:Rp${total}|JARAK:${state.lastCalc.distanceKm.toFixed(2)}KM`;
-          new QRCode(el.qrisQrCanvas, { text: payload, width: 215, height: 215, colorDark: dyn ? '#0f172a' : '#065f46', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+          new QRCode(el.qrisQrCanvas, { text: payload, width: 215, height: 215, colorDark: dyn ? '#0f172a' : '#065f46' });
         }
-        el.qrisModeBadge.textContent = dyn
-          ? 'QRIS Dinamis aktif — nominal otomatis terisi saat di-scan.'
-          : 'Mode Preview QRIS — Pastikan admin mengisi CONFIG.QRIS_STRING di kode.';
+        el.qrisModeBadge.textContent = dyn ? 'QRIS Dinamis aktif — nominal otomatis terisi saat di-scan.' : 'Mode Preview QRIS — Pastikan admin mengisi CONFIG.QRIS_STRING.';
         el.qrisModal.classList.remove('hidden');
       }
 
-      function sendOrderWa(isQrisPaid) {
+      // Encode aman agar link tidak terputus di WhatsApp (termasuk kurung/spasi)
+      function encodeSafeParam(str) {
+        return encodeURIComponent(String(str || '').trim().slice(0, 80))
+          .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+      }
+
+      function buildDriverDeepLink(paxName, note, isQrisPaid) {
+        const baseDriverUrl = new URL('./driver.html', window.location.href).href.split('?')[0];
         const c = state.lastCalc;
+        const payValue = isQrisPaid ? 'QRIS (Sudah Bayar)' : c.paymentMethod;
+        const params = [
+          `plat=${state.pickup.lat.toFixed(6)}`,
+          `plng=${state.pickup.lng.toFixed(6)}`,
+          `pname=${encodeSafeParam(state.pickup.label)}`,
+          `dlat=${state.dropoff.lat.toFixed(6)}`,
+          `dlng=${state.dropoff.lng.toFixed(6)}`,
+          `dname=${encodeSafeParam(state.dropoff.label)}`,
+          `svc=${encodeSafeParam(c.serviceValue)}`,
+          `surge=${encodeSafeParam(c.surgeMultiplier.toFixed(1))}`,
+          `mtn=${c.isMountain ? '1' : '0'}`,
+          `pay=${encodeSafeParam(payValue)}`,
+          `pax=${encodeSafeParam(paxName)}`
+        ];
+        if (note) params.push(`note=${encodeSafeParam(note)}`);
+        return `${baseDriverUrl}?${params.join('&')}`;
+      }
+
+      function validateBeforeOrder() {
+        if (!state.pickup || !state.dropoff || !state.routeDistanceKm) {
+          showAlert('Pilih Titik Penjemputan dan Titik Tujuan terlebih dahulu.', 'warning');
+          return false;
+        }
+        const paxName = el.passengerName.value.trim();
+        if (!paxName) {
+          showAlert('Mohon isi Nama Penumpang terlebih dahulu sebelum memesan.', 'warning');
+          el.passengerName.focus();
+          return false;
+        }
+        localStorage.setItem(STORAGE_KEYS.PASSENGER_NAME, paxName);
+        return true;
+      }
+
+      function sendOrderWa(isQrisPaid) {
+        const paxName = el.passengerName.value.trim();
         const note = el.orderNote.value.trim();
+        const c = state.lastCalc;
+        const driverLink = buildDriverDeepLink(paxName, note, isQrisPaid);
+
         const lines = [
           'Halo Admin *Ayo Jalan Bondowoso*! Saya ingin memesan perjalanan:',
           '',
-          `🚘 *Layanan:* ${c.serviceLabel}`,
-          `📍 *Titik Jemput:* ${state.pickup.label}\n   Maps: https://maps.google.com/?q=${state.pickup.lat},${state.pickup.lng}`,
-          `🏁 *Titik Tujuan:* ${state.dropoff.label}\n   Maps: https://maps.google.com/?q=${state.dropoff.lat},${state.dropoff.lng}`,
-          `📏 *Jarak & Waktu:* ${c.distanceKm.toFixed(2)} km • ${c.durationText}`,
-          `⚡ *Tarif Kondisi:* ${c.surgeLabel}${c.isMountain ? ' + Pegunungan' : ''}`,
-          `💳 *Metode Bayar:* ${isQrisPaid ? 'QRIS *(Sudah Transfer - bukti terlampir)*' : 'Tunai'}`,
-          `💰 *Estimasi Total:* ${formatIDR(c.totalFare)}`
+          `*Nama Penumpang:* ${paxName}`,
+          `*Layanan:* ${c.serviceLabel}`,
+          `*Titik Jemput:* ${state.pickup.label}`,
+          `  Maps: https://maps.google.com/?q=${state.pickup.lat},${state.pickup.lng}`,
+          `*Titik Tujuan:* ${state.dropoff.label}`,
+          `  Maps: https://maps.google.com/?q=${state.dropoff.lat},${state.dropoff.lng}`,
+          `*Jarak & Waktu:* ${c.distanceKm.toFixed(2)} km (${c.durationText})`,
+          `*Tarif Kondisi:* ${c.surgeLabel}${c.isMountain ? ' + Pegunungan (+20%)' : ''}`,
+          `*Metode Bayar:* ${isQrisPaid ? 'QRIS (Sudah Transfer - bukti terlampir)' : 'Tunai'}`,
+          `*Estimasi Total:* ${formatIDR(c.totalFare)}`
         ];
-        if (note) lines.push(`📝 *Catatan:* ${note}`);
-        lines.push('', isQrisPaid ? 'Berikut saya lampirkan bukti bayar QRIS. Mohon diproses ya!' : 'Mohon info ketersediaan driver terdekat. Terima kasih!');
+
+        if (note) lines.push(`*Catatan:* ${note}`);
+
+        lines.push(
+          '',
+          '------------------------------',
+          '*KHUSUS DRIVER (Klik link ini untuk buka rute otomatis di Aplikasi Driver):*',
+          driverLink,
+          '',
+          isQrisPaid ? 'Berikut saya lampirkan bukti bayar QRIS. Mohon diproses ya!' : 'Mohon info ketersediaan driver terdekat. Terima kasih!'
+        );
+
         window.open(`https://wa.me/${CONFIG.ADMIN_WA}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener,noreferrer');
       }
 
-      // =========================================================================
-      // EVENT LISTENERS
-      // =========================================================================
+      // Event Listeners
       map.on('click', (e) => { el.pickupResults.classList.add('hidden'); el.dropoffResults.classList.add('hidden'); setPoint(state.activeMapMode, e.latlng.lat, e.latlng.lng, null, true); });
       el.pickupInput.addEventListener('focus', () => renderDropdown('pickup', filterLocalPois(el.pickupInput.value)));
       el.dropoffInput.addEventListener('focus', () => renderDropdown('dropoff', filterLocalPois(el.dropoffInput.value)));
@@ -1158,14 +1005,13 @@
         el.pickupInput.value = 'Mendeteksi lokasi GPS...';
         navigator.geolocation.getCurrentPosition(
           (pos) => { renderDeviceGpsOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, false); setPoint('pickup', pos.coords.latitude, pos.coords.longitude, null, true); map.flyTo([pos.coords.latitude, pos.coords.longitude], GPS_ZOOM); },
-          () => { el.pickupInput.value = state.pickup ? state.pickup.label : ''; showAlert('Gagal mendeteksi GPS. Pastikan izin lokasi aktif.', 'error'); },
+          () => { el.pickupInput.value = state.pickup ? state.pickup.label : ''; showAlert('Gagal mendeteksi GPS.', 'error'); },
           { enableHighAccuracy: true, timeout: 10000 }
         );
       });
 
       el.btnGpsCenter.addEventListener('click', () => {
-        if (!navigator.geolocation) return;
-        navigator.geolocation.getCurrentPosition((pos) => { renderDeviceGpsOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, true); if (state.deviceGpsMarker) state.deviceGpsMarker.openPopup(); }, null, { enableHighAccuracy: true, timeout: 10000 });
+        if (navigator.geolocation) navigator.geolocation.getCurrentPosition((pos) => { renderDeviceGpsOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, true); if (state.deviceGpsMarker) state.deviceGpsMarker.openPopup(); }, null, { enableHighAccuracy: true, timeout: 10000 });
       });
 
       el.btnSwapPoints.addEventListener('click', () => {
@@ -1184,9 +1030,7 @@
       document.querySelectorAll('input[name="service-type"], input[name="payment-method"]').forEach(r => r.addEventListener('change', calculateFare));
 
       el.btnPrimaryAction.addEventListener('click', () => {
-        if (!state.pickup || !state.dropoff || !state.routeDistanceKm) {
-          return showAlert('Pilih Titik Penjemputan dan Titik Tujuan terlebih dahulu.', 'warning');
-        }
+        if (!validateBeforeOrder()) return;
         if (state.lastCalc.paymentMethod === 'QRIS') openQrisModal();
         else sendOrderWa(false);
       });
@@ -1213,6 +1057,9 @@
         map.flyTo(state.deviceGps && isWithinJatimBounds(state.deviceGps.lat, state.deviceGps.lng) ? [state.deviceGps.lat, state.deviceGps.lng] : BONDOWOSO_CENTER, state.deviceGps ? GPS_ZOOM : BONDOWOSO_ZOOM);
       });
 
+      // Init
+      const savedName = localStorage.getItem(STORAGE_KEYS.PASSENGER_NAME);
+      if (savedName) el.passengerName.value = savedName;
       setMapMode('pickup');
       renderRecentRoutes();
       calculateFare();
