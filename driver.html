@@ -41,13 +41,14 @@
       <div>
         <h2 class="text-lg font-extrabold text-slate-900">Portal Mitra Driver</h2>
         <p class="text-xs text-slate-500 mt-0.5">Ayo Jalan • Bondowoso, Jawa Timur</p>
+        <p id="pin-incoming-hint" class="hidden mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5"></p>
       </div>
       <div class="space-y-2">
         <input id="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="Masukkan PIN Driver (Default: 1234)" class="w-full text-center tracking-widest text-base font-bold px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         <p id="pin-error" class="hidden text-xs font-semibold text-rose-600">PIN salah. Silakan coba lagi.</p>
       </div>
       <button id="btn-unlock-pin" type="button" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">
-        Masuk Aplikasi Driver
+        Masuk &amp; Muat Rute
       </button>
       <a href="./index.html" class="block text-xs text-slate-400 hover:text-emerald-700 transition">← Kembali ke Halaman Penumpang</a>
     </div>
@@ -57,9 +58,7 @@
   <header class="bg-emerald-900 text-white sticky top-0 z-40 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shrink-0">
-          DRV
-        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shrink-0">DRV</div>
         <div>
           <h1 class="text-base sm:text-lg font-bold leading-tight">Ayo Jalan <span class="text-emerald-300">Driver</span></h1>
           <p class="text-xs text-emerald-200">Argo Digital, QRIS Terpusat &amp; Dompet Mitra</p>
@@ -67,19 +66,32 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="btn-open-profile" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-700 transition">
-          Rekening &amp; Profil
-        </button>
-        <button id="btn-reset-all" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
-          Reset Rute
-        </button>
+        <button id="btn-open-profile" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-700 transition">Rekening &amp; Profil</button>
+        <button id="btn-reset-all" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">Reset Rute</button>
       </div>
     </div>
   </header>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- BARIS RINGKASAN KEUANGAN DRIVER (TUNAI VS QRIS TERPUSAT) -->
+    <!-- BANNER ORDER MASUK DARI LINK WHATSAPP PENUMPANG -->
+    <div id="incoming-order-banner" class="hidden mb-5 bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+      <div class="space-y-0.5">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-600 text-white">Order dari Link WA</span>
+          <p id="incoming-pax-title" class="text-sm font-extrabold text-slate-900">Penumpang: -</p>
+        </div>
+        <p id="incoming-pax-meta" class="text-xs text-emerald-800 font-medium"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a id="btn-open-gmaps-nav" href="#" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+          Buka Navigasi Jemput
+        </a>
+        <button id="btn-dismiss-banner" type="button" class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-500 hover:text-slate-700">Tutup</button>
+      </div>
+    </div>
+
+    <!-- BARIS RINGKASAN KEUANGAN DRIVER -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
       <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
         <p class="text-[11px] font-semibold text-slate-500 uppercase">Trip Tercatat</p>
@@ -167,30 +179,10 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2">
-            <label class="cursor-pointer">
-              <input type="radio" name="service-type" value="2500" data-label="Ayo Motor" data-min="8000" data-vehicle="Motor" class="peer sr-only" />
-              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs">
-                <p class="font-bold">Ayo Motor</p><p class="text-emerald-700 font-semibold">Rp2.500/km</p>
-              </div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="service-type" value="3800" data-label="Mobil Hemat" data-min="15000" data-vehicle="Mobil" class="peer sr-only" />
-              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs">
-                <p class="font-bold">Mobil Hemat</p><p class="text-emerald-700 font-semibold">Rp3.800/km</p>
-              </div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="service-type" value="6000" data-label="Mobil Reguler" data-min="15000" data-vehicle="Mobil" class="peer sr-only" checked />
-              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs">
-                <p class="font-bold">Mobil Reguler</p><p class="text-emerald-700 font-semibold">Rp6.000/km</p>
-              </div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="service-type" value="7500" data-label="XL / Prioritas" data-min="15000" data-vehicle="Mobil" class="peer sr-only" />
-              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs">
-                <p class="font-bold">XL / Prioritas</p><p class="text-emerald-700 font-semibold">Rp7.500/km</p>
-              </div>
-            </label>
+            <label class="cursor-pointer"><input type="radio" name="service-type" value="2500" data-label="Ayo Motor" data-min="8000" data-vehicle="Motor" class="peer sr-only" /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs"><p class="font-bold">Ayo Motor</p><p class="text-emerald-700 font-semibold">Rp2.500/km</p></div></label>
+            <label class="cursor-pointer"><input type="radio" name="service-type" value="3800" data-label="Mobil Hemat" data-min="15000" data-vehicle="Mobil" class="peer sr-only" /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs"><p class="font-bold">Mobil Hemat</p><p class="text-emerald-700 font-semibold">Rp3.800/km</p></div></label>
+            <label class="cursor-pointer"><input type="radio" name="service-type" value="6000" data-label="Mobil Reguler" data-min="15000" data-vehicle="Mobil" class="peer sr-only" checked /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs"><p class="font-bold">Mobil Reguler</p><p class="text-emerald-700 font-semibold">Rp6.000/km</p></div></label>
+            <label class="cursor-pointer"><input type="radio" name="service-type" value="7500" data-label="XL / Prioritas" data-min="15000" data-vehicle="Mobil" class="peer sr-only" /><div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:bg-emerald-50 peer-checked:border-emerald-600 text-xs"><p class="font-bold">XL / Prioritas</p><p class="text-emerald-700 font-semibold">Rp7.500/km</p></div></label>
           </div>
 
           <div>
@@ -225,26 +217,11 @@
               <span>Jarak &amp; Waktu</span>
               <span class="font-semibold text-slate-800"><span id="sum-distance">0 km</span> • <span id="sum-duration">-</span></span>
             </div>
-            <div class="flex justify-between text-slate-700">
-              <span>Tarif Jarak</span>
-              <span id="sum-base-fare" class="font-semibold">Rp0</span>
-            </div>
-            <div id="row-surge" class="hidden flex justify-between text-amber-700 text-xs">
-              <span>Lonjakan (<span id="sum-surge-label">1.2x</span>)</span>
-              <span id="sum-surge-fee" class="font-semibold">+Rp0</span>
-            </div>
-            <div id="row-mountain" class="hidden flex justify-between text-emerald-800 text-xs">
-              <span>Medan Pegunungan (+20%)</span>
-              <span id="sum-mountain-fee" class="font-semibold">+Rp0</span>
-            </div>
-            <div class="flex justify-between text-slate-700">
-              <span>Potongan Platform (<span id="sum-platform-pct" class="text-xs font-bold text-emerald-700">Hemat</span>)</span>
-              <span id="sum-platform-fee" class="font-semibold">Rp0</span>
-            </div>
-            <div id="row-toll" class="hidden flex justify-between text-slate-700">
-              <span>Tol / Parkir / Tiket</span>
-              <span id="sum-toll-fee" class="font-semibold">Rp0</span>
-            </div>
+            <div class="flex justify-between text-slate-700"><span>Tarif Jarak</span><span id="sum-base-fare" class="font-semibold">Rp0</span></div>
+            <div id="row-surge" class="hidden flex justify-between text-amber-700 text-xs"><span>Lonjakan (<span id="sum-surge-label">1.2x</span>)</span><span id="sum-surge-fee" class="font-semibold">+Rp0</span></div>
+            <div id="row-mountain" class="hidden flex justify-between text-emerald-800 text-xs"><span>Medan Pegunungan (+20%)</span><span id="sum-mountain-fee" class="font-semibold">+Rp0</span></div>
+            <div class="flex justify-between text-slate-700"><span>Potongan Platform (<span id="sum-platform-pct" class="text-xs font-bold text-emerald-700">Hemat</span>)</span><span id="sum-platform-fee" class="font-semibold">Rp0</span></div>
+            <div id="row-toll" class="hidden flex justify-between text-slate-700"><span>Tol / Parkir / Tiket</span><span id="sum-toll-fee" class="font-semibold">Rp0</span></div>
 
             <div class="pt-3 border-t-2 border-emerald-100 flex items-end justify-between">
               <div>
@@ -256,12 +233,8 @@
 
             <div class="pt-3 space-y-2">
               <div class="grid grid-cols-2 gap-2">
-                <button id="btn-show-qris" type="button" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition">
-                  Bayar QRIS Terpusat
-                </button>
-                <button id="btn-save-trip" type="button" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">
-                  ✓ Catat Trip Tunai
-                </button>
+                <button id="btn-show-qris" type="button" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition">Bayar QRIS Terpusat</button>
+                <button id="btn-save-trip" type="button" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">✓ Catat Trip Tunai</button>
               </div>
               <button id="btn-send-receipt" type="button" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition">
                 Kirim Struk ke WhatsApp Penumpang
@@ -284,19 +257,16 @@
           </div>
         </div>
 
-        <!-- CARD DOMPET DRIVER & PENARIKAN SALDO (WITHDRAW) -->
+        <!-- DOMPET DRIVER & WITHDRAW -->
         <section class="bg-white rounded-2xl border border-emerald-200 shadow-sm p-5 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">Dompet Driver &amp; Tarik Saldo (Withdraw)</h2>
               <p class="text-[11px] text-slate-500">Hasil QRIS Terpusat otomatis masuk ke sini (sudah dipotong biaya platform).</p>
             </div>
-            <button id="btn-edit-bank" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-              Atur Rekening / E-Wallet
-            </button>
+            <button id="btn-edit-bank" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Atur Rekening / E-Wallet</button>
           </div>
 
-          <!-- Info Rekening Tujuan Driver -->
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div>
               <p class="text-[11px] text-slate-400">Rekening / E-Wallet Pencairan Driver:</p>
@@ -305,8 +275,7 @@
             <span id="display-driver-name-badge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[11px]">Mitra Ayo Jalan</span>
           </div>
 
-          <!-- Form Penarikan Saldo -->
-          <div id="withdraw-action-box" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
             <div class="sm:col-span-5">
               <label for="withdraw-amount-input" class="block text-[11px] font-semibold text-slate-600 mb-1">Nominal Tarik Saldo (Rp)</label>
               <div class="relative">
@@ -321,7 +290,6 @@
             </div>
           </div>
 
-          <!-- Riwayat Withdraw -->
           <div id="withdraw-history-box" class="hidden pt-2 border-t border-slate-100">
             <p class="text-[11px] font-semibold text-slate-500 mb-2">Riwayat Pengajuan Withdraw:</p>
             <div id="withdraw-log-list" class="space-y-1.5 text-xs"></div>
@@ -336,15 +304,9 @@
               <p class="text-[11px] text-slate-400">Tanggal Aktif: <strong id="display-today-date" class="text-slate-600">-</strong></p>
             </div>
             <div class="flex flex-wrap items-center gap-1.5">
-              <button id="btn-send-report-wa" type="button" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">
-                Kirim Laporan ke WA Admin
-              </button>
-              <button id="btn-copy-report" type="button" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-                Salin
-              </button>
-              <button id="btn-clear-trips" type="button" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition">
-                Tutup Buku
-              </button>
+              <button id="btn-send-report-wa" type="button" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">Kirim Laporan ke WA Admin</button>
+              <button id="btn-copy-report" type="button" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Salin</button>
+              <button id="btn-clear-trips" type="button" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition">Tutup Buku</button>
             </div>
           </div>
 
@@ -357,7 +319,7 @@
     </div>
   </main>
 
-  <!-- MODAL QRIS TERPUSAT PERUSAHAAN -->
+  <!-- MODAL QRIS TERPUSAT -->
   <div id="qris-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
       <div class="bg-emerald-800 px-5 py-3.5 text-white flex items-center justify-between">
@@ -427,9 +389,6 @@
 
   <script>
     (() => {
-      // =========================================================================
-      // KONFIGURASI TERPUSAT OPERATOR / ADMIN AYO JALAN
-      // =========================================================================
       const OPERATOR_CONFIG = {
         DRIVER_PIN: '1234',                 // Ganti PIN akses driver
         ADMIN_WA: '6285785068226',          // Nomor WA Admin penerima laporan & withdraw
@@ -471,9 +430,15 @@
 
       const el = {
         pinLock: document.getElementById('pin-lock-screen'),
+        pinIncomingHint: document.getElementById('pin-incoming-hint'),
         pinInput: document.getElementById('pin-input'),
         pinError: document.getElementById('pin-error'),
         btnUnlockPin: document.getElementById('btn-unlock-pin'),
+        incomingBanner: document.getElementById('incoming-order-banner'),
+        incomingPaxTitle: document.getElementById('incoming-pax-title'),
+        incomingPaxMeta: document.getElementById('incoming-pax-meta'),
+        btnOpenGmapsNav: document.getElementById('btn-open-gmaps-nav'),
+        btnDismissBanner: document.getElementById('btn-dismiss-banner'),
         statTripCount: document.getElementById('stat-trip-count'),
         statTripSplit: document.getElementById('stat-trip-split'),
         statGross: document.getElementById('stat-gross'),
@@ -552,19 +517,6 @@
         inputPayoutHolder: document.getElementById('input-payout-holder')
       };
 
-      // PIN Gate
-      if (sessionStorage.getItem(STORAGE_KEYS.SESSION_UNLOCKED) === '1') el.pinLock.classList.add('hidden');
-      function tryUnlock() {
-        if (el.pinInput.value.trim() === OPERATOR_CONFIG.DRIVER_PIN) {
-          sessionStorage.setItem(STORAGE_KEYS.SESSION_UNLOCKED, '1');
-          el.pinLock.classList.add('hidden');
-          setTimeout(() => map.invalidateSize(), 150);
-        } else { el.pinError.classList.remove('hidden'); }
-      }
-      el.btnUnlockPin.addEventListener('click', tryUnlock);
-      el.pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
-
-      // Peta
       const map = L.map('map', { center: BONDOWOSO_CENTER, zoom: BONDOWOSO_ZOOM });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
@@ -603,7 +555,6 @@
         el.routeAlert.textContent = 'Rute jalan tidak ditemukan. Isi jarak secara manual di bawah.';
       });
 
-      // Helper Format
       const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(n));
       function formatDuration(sec) {
         if (!sec || sec <= 0) return '-';
@@ -613,7 +564,6 @@
       function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
       function getTodayFormatted() { return new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
 
-      // Biaya Platform Progresif (Makin Jauh, % Makin Kecil)
       function calculateProgressivePlatformFee(distanceKm, baseDistanceFare, vehicleType) {
         if (distanceKm <= 0 && baseDistanceFare <= 0) return { fee: 0, pctLabel: 'Hemat' };
         let pct = 0, minFee = 0, maxFee = 0, tierLabel = '';
@@ -670,7 +620,6 @@
         el.sumTotal.textContent = formatIDR(totalFare);
       }
 
-      // Titik & Pencarian
       function setMapMode(mode) {
         state.activeMapMode = mode;
         const p = mode === 'pickup';
@@ -714,6 +663,70 @@
         if (!state.isManualDistance) el.distanceInput.value = 0;
         calculateFare();
       }
+
+      // =========================================================================
+      // BACA ORDER OTOMATIS DARI LINK WHATSAPP PENUMPANG (?plat=...&dlat=...)
+      // =========================================================================
+      function applyOrderFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const plat = parseFloat(params.get('plat'));
+        const plng = parseFloat(params.get('plng'));
+        const dlat = parseFloat(params.get('dlat'));
+        const dlng = parseFloat(params.get('dlng'));
+
+        if ([plat, plng, dlat, dlng].some(v => isNaN(v))) return;
+
+        const pname = params.get('pname') || `${plat.toFixed(5)}, ${plng.toFixed(5)}`;
+        const dname = params.get('dname') || `${dlat.toFixed(5)}, ${dlng.toFixed(5)}`;
+        const svc = params.get('svc');
+        const surge = params.get('surge');
+        const mtn = params.get('mtn');
+        const pay = params.get('pay') || 'Tunai';
+        const pax = params.get('pax') || 'Penumpang';
+        const note = params.get('note') || '';
+
+        if (svc) {
+          const svcRadio = document.querySelector(`input[name="service-type"][value="${svc}"]`);
+          if (svcRadio) svcRadio.checked = true;
+        }
+        if (surge) {
+          const surgeRadio = document.querySelector(`input[name="surge-multiplier"][value="${surge}"]`);
+          if (surgeRadio) surgeRadio.checked = true;
+        }
+        el.mountainToggle.checked = (mtn === '1');
+
+        // Tampilkan info di layar kunci PIN dan banner atas
+        el.pinIncomingHint.textContent = `Order masuk dari: ${pax} (${pname} → ${dname})`;
+        el.pinIncomingHint.classList.remove('hidden');
+
+        el.incomingPaxTitle.textContent = `Penumpang: ${pax} • Bayar: ${pay}`;
+        el.incomingPaxMeta.textContent = note
+          ? `Catatan Penumpang: "${note}"`
+          : `Rute: ${pname} → ${dname}`;
+        el.btnOpenGmapsNav.href = `https://www.google.com/maps/dir/?api=1&destination=${plat},${plng}`;
+        el.incomingBanner.classList.remove('hidden');
+
+        setPoint('pickup', plat, plng, pname, false);
+        setPoint('dropoff', dlat, dlng, dname, false);
+        calculateFare();
+      }
+
+      // PIN Gate
+      if (sessionStorage.getItem(STORAGE_KEYS.SESSION_UNLOCKED) === '1') el.pinLock.classList.add('hidden');
+      function tryUnlock() {
+        if (el.pinInput.value.trim() === OPERATOR_CONFIG.DRIVER_PIN) {
+          sessionStorage.setItem(STORAGE_KEYS.SESSION_UNLOCKED, '1');
+          el.pinLock.classList.add('hidden');
+          setTimeout(() => {
+            map.invalidateSize();
+            if (state.pickup && state.dropoff) {
+              map.fitBounds(L.latLngBounds([[state.pickup.lat, state.pickup.lng], [state.dropoff.lat, state.dropoff.lng]]), { padding: [50, 50] });
+            }
+          }, 200);
+        } else { el.pinError.classList.remove('hidden'); }
+      }
+      el.btnUnlockPin.addEventListener('click', tryUnlock);
+      el.pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
 
       async function reverseGeocode(type, lat, lng) {
         try {
@@ -769,29 +782,19 @@
       const debP = debounce((v, l) => searchOsm('pickup', v, l), 400);
       const debD = debounce((v, l) => searchOsm('dropoff', v, l), 400);
 
-      // =========================================================================
-      // PROFIL REKENING, DOMPET DRIVER & REKAP TUNAI VS QRIS TERPUSAT
-      // =========================================================================
-      function getProfile() {
-        try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE) || '{}');
-        } catch { return {}; }
-      }
-
+      // Profil, Rekap & Dompet Driver
+      function getProfile() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE) || '{}'); } catch { return {}; } }
       function renderProfile() {
         const p = getProfile();
         const dName = p.driverName || 'Mitra Ayo Jalan';
         el.displayDriverNameBadge.textContent = dName;
-        if (p.bank && p.accountNumber) {
-          el.displayPayoutAccount.textContent = `${p.bank} • ${p.accountNumber} (${p.accountHolder || dName})`;
-        } else {
-          el.displayPayoutAccount.textContent = 'Belum diatur (Klik "Atur Rekening / E-Wallet")';
-        }
+        el.displayPayoutAccount.textContent = (p.bank && p.accountNumber)
+          ? `${p.bank} • ${p.accountNumber} (${p.accountHolder || dName})`
+          : 'Belum diatur (Klik "Atur Rekening / E-Wallet")';
       }
 
       function loadTrips() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.TRIPS) || '[]'); } catch { return []; } }
       function saveTrips(list) { localStorage.setItem(STORAGE_KEYS.TRIPS, JSON.stringify(list)); renderFinancials(); }
-
       function loadWithdraws() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WITHDRAWS) || '[]'); } catch { return []; } }
       function saveWithdraws(list) { localStorage.setItem(STORAGE_KEYS.WITHDRAWS, JSON.stringify(list)); renderFinancials(); }
 
@@ -814,51 +817,31 @@
         saveTrips(list);
       }
 
-      function deleteTripById(id) {
-        const filtered = loadTrips().filter(t => t.id !== id);
-        saveTrips(filtered);
-      }
+      function deleteTripById(id) { saveTrips(loadTrips().filter(t => t.id !== id)); }
 
       function renderFinancials() {
         const trips = loadTrips();
         const withdraws = loadWithdraws();
-
-        let countTunai = 0, countQris = 0;
-        let grossTunai = 0, grossQris = 0;
-        let feeTunai = 0, feeQris = 0;
-        let netQrisToWallet = 0;
+        let countTunai = 0, countQris = 0, grossTunai = 0, grossQris = 0, feeTunai = 0, feeQris = 0, netQrisToWallet = 0;
 
         trips.forEach(t => {
-          if (t.payMethod === 'QRIS') {
-            countQris++;
-            grossQris += t.total;
-            feeQris += t.fee;
-            netQrisToWallet += t.net; // QRIS terpusat: hak bersih masuk ke Dompet Driver
-          } else {
-            countTunai++;
-            grossTunai += t.total;
-            feeTunai += t.fee; // Tunai: setoran platform memotong Dompet Driver
-          }
+          if (t.payMethod === 'QRIS') { countQris++; grossQris += t.total; feeQris += t.fee; netQrisToWallet += t.net; }
+          else { countTunai++; grossTunai += t.total; feeTunai += t.fee; }
         });
 
         let totalWithdrawn = 0;
         withdraws.forEach(w => { totalWithdrawn += w.amount; });
 
-        // Saldo Dompet Driver = (Hak Bersih QRIS Terpusat) - (Setoran Tunai) - (Sudah Diajukan Withdraw)
         const walletBalance = netQrisToWallet - feeTunai - totalWithdrawn;
         state.walletBalance = walletBalance;
 
-        const grossAll = grossTunai + grossQris;
-        const feeAll = feeTunai + feeQris;
-
         el.statTripCount.textContent = trips.length;
         el.statTripSplit.textContent = `${countTunai} Tunai • ${countQris} QRIS`;
-        el.statGross.textContent = formatIDR(grossAll);
+        el.statGross.textContent = formatIDR(grossTunai + grossQris);
         el.statGrossSplit.textContent = `Tunai ${formatIDR(grossTunai)} • QRIS ${formatIDR(grossQris)}`;
-        el.statFee.textContent = formatIDR(feeAll);
+        el.statFee.textContent = formatIDR(feeTunai + feeQris);
         el.statFeeSub.textContent = `QRIS (terpotong) ${formatIDR(feeQris)} • Tunai ${formatIDR(feeTunai)}`;
 
-        // Warna & Teks Saldo Dompet (Positif = Bisa Tarik, Negatif = Kurang Setor Tunai)
         if (walletBalance >= 0) {
           el.cardWalletBalance.className = 'bg-emerald-50 rounded-2xl p-4 border border-emerald-200 shadow-xs';
           el.statWalletLabel.className = 'text-[11px] font-semibold text-emerald-700 uppercase';
@@ -877,7 +860,6 @@
           el.statWalletSub.textContent = 'Sisa setoran platform trip Tunai';
         }
 
-        // Render Daftar Trip dengan Tanggal/Jam & Tombol Hapus per-Trip
         if (!trips.length) {
           el.tripLogList.innerHTML = `<p class="text-slate-400 text-center py-6">Belum ada trip yang dicatat.</p>`;
         } else {
@@ -885,41 +867,28 @@
           trips.forEach(t => {
             const isQris = t.payMethod === 'QRIS';
             const badgeCls = isQris ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700';
-            const walletEffect = isQris
-              ? `<span class="text-emerald-700 font-semibold">+${formatIDR(t.net)} ke Dompet</span>`
-              : `<span class="text-amber-700 font-semibold">-${formatIDR(t.fee)} (Setoran)</span>`;
-
+            const walletEffect = isQris ? `<span class="text-emerald-700 font-semibold">+${formatIDR(t.net)} ke Dompet</span>` : `<span class="text-amber-700 font-semibold">-${formatIDR(t.fee)} (Setoran)</span>`;
             const row = document.createElement('div');
             row.className = 'p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2';
             row.innerHTML = `
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeCls}">${t.payMethod}</span>
-                  <span class="text-[11px] text-slate-400">${t.dateStr}, ${t.timeStr}</span>
-                </div>
+                <div class="flex items-center gap-1.5 mb-0.5"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeCls}">${t.payMethod}</span><span class="text-[11px] text-slate-400">${t.dateStr}, ${t.timeStr}</span></div>
                 <p class="font-bold text-slate-800 truncate">${escapeHtml(t.route)}</p>
                 <p class="text-[11px] text-slate-500">${escapeHtml(t.service)} (${t.distance} km) • ${walletEffect}</p>
               </div>
               <div class="text-right shrink-0 flex items-center gap-2">
-                <div>
-                  <p class="font-extrabold text-slate-900">${formatIDR(t.total)}</p>
-                  <p class="text-[10px] text-slate-400">Platform: ${formatIDR(t.fee)}</p>
-                </div>
+                <div><p class="font-extrabold text-slate-900">${formatIDR(t.total)}</p><p class="text-[10px] text-slate-400">Platform: ${formatIDR(t.fee)}</p></div>
                 <button type="button" title="Hapus trip ini" class="btn-del-trip p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" data-id="${t.id}">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
               </div>`;
             el.tripLogList.appendChild(row);
           });
-
           el.tripLogList.querySelectorAll('.btn-del-trip').forEach(btn => {
-            btn.addEventListener('click', () => {
-              if (confirm('Hapus catatan trip ini?')) deleteTripById(Number(btn.dataset.id));
-            });
+            btn.addEventListener('click', () => { if (confirm('Hapus catatan trip ini?')) deleteTripById(Number(btn.dataset.id)); });
           });
         }
 
-        // Render Riwayat Withdraw
         el.withdrawHistoryBox.classList.toggle('hidden', !withdraws.length);
         el.withdrawLogList.innerHTML = '';
         withdraws.forEach(w => {
@@ -927,34 +896,18 @@
           const row = document.createElement('div');
           row.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2';
           row.innerHTML = `
-            <div class="min-w-0">
-              <p class="font-bold text-slate-800">${formatIDR(w.amount)} → ${escapeHtml(w.bank)} (${escapeHtml(w.accountNumber)})</p>
-              <p class="text-[10px] text-slate-500">${w.dateStr}, ${w.timeStr} • a.n. ${escapeHtml(w.accountName)}</p>
-            </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${w.status}</span>
-              ${!isPaid ? `<button type="button" class="btn-mark-paid text-[10px] font-semibold text-emerald-700 hover:underline" data-id="${w.id}">Tandai Cair</button>` : ''}
-            </div>`;
+            <div class="min-w-0"><p class="font-bold text-slate-800">${formatIDR(w.amount)} → ${escapeHtml(w.bank)} (${escapeHtml(w.accountNumber)})</p><p class="text-[10px] text-slate-500">${w.dateStr}, ${w.timeStr} • a.n. ${escapeHtml(w.accountName)}</p></div>
+            <div class="flex items-center gap-1.5 shrink-0"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${w.status}</span>${!isPaid ? `<button type="button" class="btn-mark-paid text-[10px] font-semibold text-emerald-700 hover:underline" data-id="${w.id}">Tandai Cair</button>` : ''}</div>`;
           el.withdrawLogList.appendChild(row);
         });
-
         el.withdrawLogList.querySelectorAll('.btn-mark-paid').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const list = loadWithdraws().map(w => w.id === Number(btn.dataset.id) ? { ...w, status: 'Cair' } : w);
-            saveWithdraws(list);
-          });
+          btn.addEventListener('click', () => saveWithdraws(loadWithdraws().map(w => w.id === Number(btn.dataset.id) ? { ...w, status: 'Cair' } : w)));
         });
       }
 
-      // =========================================================================
-      // QRIS TERPUSAT DINAMIS
-      // =========================================================================
       function crc16Ccitt(str) {
         let crc = 0xFFFF;
-        for (let i = 0; i < str.length; i++) {
-          crc ^= (str.charCodeAt(i) & 0xFF) << 8;
-          for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
-        }
+        for (let i = 0; i < str.length; i++) { crc ^= (str.charCodeAt(i) & 0xFF) << 8; for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF; }
         return crc.toString(16).toUpperCase().padStart(4, '0');
       }
 
@@ -985,47 +938,35 @@
         el.qrisModalAmount.textContent = formatIDR(total);
         el.qrisModalSplit.textContent = `Masuk Dompet Driver: ${formatIDR(state.lastCalc.netDriver)} • Potong Platform: ${formatIDR(state.lastCalc.platformFee)}`;
         el.qrisQrCanvas.innerHTML = '';
-
         const dyn = buildDynamicQrisString(OPERATOR_CONFIG.QRIS_STRING, total);
         if (typeof QRCode !== 'undefined') {
           const payload = dyn || `AYO-JALAN-TERPUSAT|TOTAL:Rp${total}|NET:${Math.round(state.lastCalc.netDriver)}`;
           new QRCode(el.qrisQrCanvas, { text: payload, width: 215, height: 215, colorDark: dyn ? '#0f172a' : '#065f46' });
         }
-        el.qrisModeBadge.textContent = dyn
-          ? 'QRIS Terpusat Dinamis — dana masuk Admin, hak bersih otomatis masuk Dompet Driver.'
-          : 'Mode Simulasi QRIS Terpusat — Admin perlu mengisi OPERATOR_CONFIG.QRIS_STRING di kode.';
+        el.qrisModeBadge.textContent = dyn ? 'QRIS Terpusat Dinamis — dana masuk Admin, hak bersih otomatis masuk Dompet Driver.' : 'Mode Simulasi QRIS Terpusat — Admin perlu mengisi OPERATOR_CONFIG.QRIS_STRING.';
         el.qrisModal.classList.remove('hidden');
       }
 
-      // =========================================================================
-      // LAPORAN & PENGAJUAN WITHDRAW KE WA ADMIN
-      // =========================================================================
       function buildSummaryReportText() {
-        const trips = loadTrips();
-        const p = getProfile();
-        let grossTunai = 0, grossQris = 0, feeTunai = 0, feeQris = 0, netQris = 0;
-        trips.forEach(t => {
-          if (t.payMethod === 'QRIS') { grossQris += t.total; feeQris += t.fee; netQris += t.net; }
-          else { grossTunai += t.total; feeTunai += t.fee; }
-        });
+        const trips = loadTrips(), p = getProfile();
+        let grossTunai = 0, grossQris = 0, feeTunai = 0, netQris = 0;
+        trips.forEach(t => { if (t.payMethod === 'QRIS') { grossQris += t.total; netQris += t.net; } else { grossTunai += t.total; feeTunai += t.fee; } });
         const bal = state.walletBalance;
-        const statusLine = bal >= 0
-          ? `Saldo Dompet Driver (Bisa Withdraw): ${formatIDR(bal)}`
-          : `Wajib Setor Driver ke Admin: ${formatIDR(Math.abs(bal))}`;
-
+        const statusLine = bal >= 0 ? `Saldo Dompet Driver (Bisa Withdraw): ${formatIDR(bal)}` : `Wajib Setor Driver ke Admin: ${formatIDR(Math.abs(bal))}`;
         return [
           `*LAPORAN TRIP AYO JALAN BONDOWOSO*`,
           `Tanggal: ${getTodayFormatted()}`,
           `Driver: ${p.driverName || 'Mitra Ayo Jalan'}`,
           `Jumlah Trip: ${trips.length} trip`,
           ``,
-          `• Omzet Tunai: ${formatIDR(grossTunai)} (Potongan Platform: ${formatIDR(feeTunai)})`,
-          `• Omzet QRIS Terpusat: ${formatIDR(grossQris)} (Hak Driver: ${formatIDR(netQris)})`,
-          `• *${statusLine}*`
+          `- Omzet Tunai: ${formatIDR(grossTunai)} (Potongan Platform: ${formatIDR(feeTunai)})`,
+          `- Omzet QRIS Terpusat: ${formatIDR(grossQris)} (Hak Driver: ${formatIDR(netQris)})`,
+          `- *${statusLine}*`
         ].join('\n');
       }
 
       // Event Listeners
+      el.btnDismissBanner.addEventListener('click', () => el.incomingBanner.classList.add('hidden'));
       map.on('click', (e) => { el.pickupResults.classList.add('hidden'); el.dropoffResults.classList.add('hidden'); setPoint(state.activeMapMode, e.latlng.lat, e.latlng.lng, null, true); });
       el.pickupInput.addEventListener('focus', () => renderDropdown('pickup', filterLocalPois(el.pickupInput.value)));
       el.dropoffInput.addEventListener('focus', () => renderDropdown('dropoff', filterLocalPois(el.dropoffInput.value)));
@@ -1044,9 +985,7 @@
         if (p) setPoint('dropoff', p.lat, p.lng, p.label, false);
       });
 
-      el.btnGpsPickup.addEventListener('click', () => {
-        if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { setPoint('pickup', pos.coords.latitude, pos.coords.longitude, null, true); map.flyTo([pos.coords.latitude, pos.coords.longitude], 15); });
-      });
+      el.btnGpsPickup.addEventListener('click', () => { if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { setPoint('pickup', pos.coords.latitude, pos.coords.longitude, null, true); map.flyTo([pos.coords.latitude, pos.coords.longitude], 15); }); });
       el.btnGpsCenter.addEventListener('click', () => {
         if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => {
           const { latitude, longitude } = pos.coords;
@@ -1071,22 +1010,14 @@
       el.btnSendReceipt.addEventListener('click', () => {
         if (state.lastCalc.totalFare <= 0) return alert('Belum ada nominal perjalanan.');
         const p = getProfile();
-        const msg = [`*STRUK PERJALANAN AYO JALAN*`, `Driver: ${p.driverName || 'Mitra Ayo Jalan'}`, `Layanan: ${state.lastCalc.serviceLabel}`, `Rute: ${state.pickup ? state.pickup.label : '-'} → ${state.dropoff ? state.dropoff.label : '-'}`, `Jarak: ${state.lastCalc.distanceKm.toFixed(2)} km`, `*Total Tagihan: ${formatIDR(state.lastCalc.totalFare)}*`].join('\n');
+        const msg = [`*STRUK PERJALANAN AYO JALAN*`, `Driver: ${p.driverName || 'Mitra Ayo Jalan'}`, `Layanan: ${state.lastCalc.serviceLabel}`, `Rute: ${state.pickup ? state.pickup.label : '-'} -> ${state.dropoff ? state.dropoff.label : '-'}`, `Jarak: ${state.lastCalc.distanceKm.toFixed(2)} km`, `*Total Tagihan: ${formatIDR(state.lastCalc.totalFare)}*`].join('\n');
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
       });
 
-      // Withdraw Events
-      el.btnWithdrawMax.addEventListener('click', () => {
-        el.withdrawAmountInput.value = Math.max(0, Math.floor(state.walletBalance));
-      });
-
+      el.btnWithdrawMax.addEventListener('click', () => { el.withdrawAmountInput.value = Math.max(0, Math.floor(state.walletBalance)); });
       el.btnRequestWithdraw.addEventListener('click', () => {
         const p = getProfile();
-        if (!p.bank || !p.accountNumber) {
-          alert('Silakan atur Rekening Bank atau Dompet Digital Anda terlebih dahulu.');
-          openProfileModal();
-          return;
-        }
+        if (!p.bank || !p.accountNumber) { alert('Silakan atur Rekening Bank atau Dompet Digital Anda terlebih dahulu.'); openProfileModal(); return; }
         const amt = Math.floor(parseFloat(el.withdrawAmountInput.value) || 0);
         if (state.walletBalance <= 0) return alert('Saldo Dompet Driver belum mencukupi untuk ditarik.');
         if (amt <= 0 || amt > state.walletBalance) return alert(`Masukkan nominal tarik antara Rp1 s.d. ${formatIDR(state.walletBalance)}.`);
@@ -1094,77 +1025,45 @@
         const now = new Date();
         const list = loadWithdraws();
         list.unshift({
-          id: Date.now(),
-          dateStr: now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+          id: Date.now(), dateStr: now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
           timeStr: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-          amount: amt,
-          bank: p.bank,
-          accountNumber: p.accountNumber,
-          accountName: p.accountHolder || p.driverName || 'Mitra',
-          status: 'Menunggu'
+          amount: amt, bank: p.bank, accountNumber: p.accountNumber, accountName: p.accountHolder || p.driverName || 'Mitra', status: 'Menunggu'
         });
         el.withdrawAmountInput.value = '';
         saveWithdraws(list);
 
         const waMsg = [
-          `*PENGAJUAN WITHDRAW DRIVER AYO JALAN*`,
-          `Tanggal: ${getTodayFormatted()}`,
-          `Driver: ${p.driverName || 'Mitra Ayo Jalan'}`,
-          `Nominal Tarik: *${formatIDR(amt)}*`,
-          `Tujuan: *${p.bank}*`,
-          `No. Rek / E-Wallet: *${p.accountNumber}*`,
-          `Atas Nama: ${p.accountHolder || p.driverName || '-'}`,
-          ``,
-          `Mohon diproses pencairan saldo dompet driver. Terima kasih!`
+          `*PENGAJUAN WITHDRAW DRIVER AYO JALAN*`, `Tanggal: ${getTodayFormatted()}`, `Driver: ${p.driverName || 'Mitra Ayo Jalan'}`,
+          `Nominal Tarik: *${formatIDR(amt)}*`, `Tujuan: *${p.bank}*`, `No. Rek / E-Wallet: *${p.accountNumber}*`, `Atas Nama: ${p.accountHolder || p.driverName || '-'}`,
+          ``, `Mohon diproses pencairan saldo dompet driver. Terima kasih!`
         ].join('\n');
         window.open(`https://wa.me/${OPERATOR_CONFIG.ADMIN_WA}?text=${encodeURIComponent(waMsg)}`, '_blank', 'noopener,noreferrer');
       });
 
-      // Laporan WA & Tutup Buku
-      el.btnSendReportWa.addEventListener('click', () => {
-        if (!loadTrips().length) return alert('Belum ada trip yang dicatat.');
-        window.open(`https://wa.me/${OPERATOR_CONFIG.ADMIN_WA}?text=${encodeURIComponent(buildSummaryReportText())}`, '_blank', 'noopener,noreferrer');
-      });
+      el.btnSendReportWa.addEventListener('click', () => { if (!loadTrips().length) return alert('Belum ada trip yang dicatat.'); window.open(`https://wa.me/${OPERATOR_CONFIG.ADMIN_WA}?text=${encodeURIComponent(buildSummaryReportText())}`, '_blank', 'noopener,noreferrer'); });
+      el.btnCopyReport.addEventListener('click', async () => { if (!loadTrips().length) return alert('Belum ada trip.'); try { await navigator.clipboard.writeText(buildSummaryReportText()); alert('Laporan berhasil disalin!'); } catch {} });
+      el.btnClearTrips.addEventListener('click', () => { if (confirm('Tutup buku akan menghapus daftar trip dan riwayat withdraw aktif saat ini. Lanjutkan?')) { localStorage.setItem(STORAGE_KEYS.TRIPS, '[]'); localStorage.setItem(STORAGE_KEYS.WITHDRAWS, '[]'); renderFinancials(); } });
 
-      el.btnCopyReport.addEventListener('click', async () => {
-        if (!loadTrips().length) return alert('Belum ada trip.');
-        try { await navigator.clipboard.writeText(buildSummaryReportText()); alert('Laporan berhasil disalin!'); } catch {}
-      });
-
-      el.btnClearTrips.addEventListener('click', () => {
-        if (confirm('Tutup buku akan menghapus seluruh daftar trip dan riwayat withdraw aktif saat ini. Pastikan setoran/pencairan sudah beres. Lanjutkan?')) {
-          localStorage.setItem(STORAGE_KEYS.TRIPS, '[]');
-          localStorage.setItem(STORAGE_KEYS.WITHDRAWS, '[]');
-          renderFinancials();
-        }
-      });
-
-      // Modal Profil Rekening
       function openProfileModal() {
         const p = getProfile();
-        el.inputDriverName.value = p.driverName || '';
-        el.inputPayoutBank.value = p.bank || 'DANA';
-        el.inputPayoutNumber.value = p.accountNumber || '';
-        el.inputPayoutHolder.value = p.accountHolder || '';
+        el.inputDriverName.value = p.driverName || ''; el.inputPayoutBank.value = p.bank || 'DANA';
+        el.inputPayoutNumber.value = p.accountNumber || ''; el.inputPayoutHolder.value = p.accountHolder || '';
         el.profileModal.classList.remove('hidden');
       }
       el.btnOpenProfile.addEventListener('click', openProfileModal);
       el.btnEditBank.addEventListener('click', openProfileModal);
       el.btnCloseProfile.addEventListener('click', () => el.profileModal.classList.add('hidden'));
       el.btnSaveProfile.addEventListener('click', () => {
-        const data = {
+        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify({
           driverName: el.inputDriverName.value.trim() || 'Mitra Ayo Jalan',
-          bank: el.inputPayoutBank.value,
-          accountNumber: el.inputPayoutNumber.value.trim(),
-          accountHolder: el.inputPayoutHolder.value.trim()
-        };
-        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(data));
-        renderProfile();
-        el.profileModal.classList.add('hidden');
+          bank: el.inputPayoutBank.value, accountNumber: el.inputPayoutNumber.value.trim(), accountHolder: el.inputPayoutHolder.value.trim()
+        }));
+        renderProfile(); el.profileModal.classList.add('hidden');
       });
 
       el.btnResetAll.addEventListener('click', () => {
         clearPoint('pickup'); clearPoint('dropoff');
+        el.incomingBanner.classList.add('hidden');
         state.isManualDistance = false; el.distanceInput.value = 0; el.tollInput.value = 0; el.mountainToggle.checked = false;
         document.querySelector('input[name="service-type"][value="6000"]').checked = true;
         document.querySelector('input[name="surge-multiplier"][value="1.0"]').checked = true;
@@ -1177,6 +1076,7 @@
       renderProfile();
       renderFinancials();
       calculateFare();
+      applyOrderFromUrl();
     })();
   </script>
 
