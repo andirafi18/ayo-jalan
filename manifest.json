@@ -36,7 +36,7 @@
   "screenshots": [
     {
       "src": "./screenshot-mobile.png",
-      "sizes": "540x960",
+      "sizes": "576x1280",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Tampilan Ayo Jalan di HP"
