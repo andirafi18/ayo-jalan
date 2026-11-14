@@ -17,7 +17,6 @@ window.AYO_CORE = (() => {
   const BONDOWOSO_ZOOM = 13;
   const JATIM_BBOX = { minLng: 110.85, minLat: -8.85, maxLng: 115.95, maxLat: -5.75 };
 
-  // 28 Titik Populer & Pusat 23 Kecamatan se-Kabupaten Bondowoso
   const BONDOWOSO_POIS = [
     { name: 'Alun-Alun RBA Ki Ronggo Bondowoso', area: 'Kec. Bondowoso (Pusat Kota)', lat: -7.9135, lng: 113.8215 },
     { name: 'Terminal Bondowoso', area: 'Jl. Imam Bonjol, Bondowoso', lat: -7.9158, lng: 113.8317 },
@@ -61,7 +60,7 @@ window.AYO_CORE = (() => {
   function getSupabase() {
     if (supabaseClient) return supabaseClient;
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.AYO_CONFIG;
-    if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+    if (SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('ISI_URL') && window.supabase) {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
     return supabaseClient;
@@ -113,7 +112,6 @@ window.AYO_CORE = (() => {
     return { multiplier: 1.0, label: 'Normal (1.0x)', badge: 'Tarif Normal' };
   }
 
-  // Biaya Platform Progresif (Makin Jauh, % Makin Kecil)
   function calcPlatformFee(distanceKm, baseDistanceFare, vehicleType) {
     if (distanceKm <= 0 && baseDistanceFare <= 0) return { fee: 0, pctLabel: 'Hemat', note: 'Tarif ringan, makin jauh % makin kecil' };
     let pct = 0, minFee = 0, maxFee = 0, tierLabel = '';
@@ -138,7 +136,6 @@ window.AYO_CORE = (() => {
     };
   }
 
-  // Konverter QRIS Statis -> Dinamis (EMVCo CRC16-CCITT)
   function crc16Ccitt(str) {
     let crc = 0xFFFF;
     for (let i = 0; i < str.length; i++) {
@@ -168,22 +165,32 @@ window.AYO_CORE = (() => {
     return body + crc16Ccitt(body);
   }
 
-  // Bunyi Notifikasi Order Baru (Tanpa File MP3)
-  function playOrderChime() {
+  // AudioContext tunggal yang dibuka saat interaksi klik user agar tidak diblokir browser
+  let sharedAudioCtx = null;
+  function unlockAudio() {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
-      const ctx = new Ctx();
-      [880, 1174.66].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.16);
-        gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.16);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.16 + 0.35);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + i * 0.16);
-        osc.stop(ctx.currentTime + i * 0.16 + 0.36);
+      if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+      if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+    } catch {}
+  }
+
+  function playOrderChime() {
+    try {
+      unlockAudio();
+      if (!sharedAudioCtx) return;
+      const now = sharedAudioCtx.currentTime;
+      [880, 1174.66, 1396.91].forEach((freq, i) => {
+        const osc = sharedAudioCtx.createOscillator();
+        const gain = sharedAudioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + i * 0.16);
+        gain.gain.setValueAtTime(0.35, now + i * 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.16 + 0.4);
+        osc.connect(gain); gain.connect(sharedAudioCtx.destination);
+        osc.start(now + i * 0.16);
+        osc.stop(now + i * 0.16 + 0.42);
       });
     } catch {}
   }
@@ -198,6 +205,6 @@ window.AYO_CORE = (() => {
     BONDOWOSO_CENTER, BONDOWOSO_ZOOM, JATIM_BBOX, BONDOWOSO_POIS, DEFAULT_TARIFFS,
     getSupabase, fetchActiveTariffs, formatIDR, formatDuration, escapeHtml,
     isWithinJatim, detectMountainRoute, getAutoSurge, calcPlatformFee,
-    buildDynamicQris, playOrderChime, normalizePhoneWa
+    buildDynamicQris, unlockAudio, playOrderChime, normalizePhoneWa
   };
 })();
