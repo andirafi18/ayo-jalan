@@ -1,48 +1,3 @@
-Berikut adalah pembaruan lengkap index.html dengan penambahan pembayaran QRIS
-dan skema Biaya Jasa Aplikasi / Platform bertingkat ala Grab Indonesia (lebih
-murah, persentase mengecil seiring jarak tempuh makin jauh).
-
-Ringkasan Skema Baru yang Diterapkan
-
-1. Skema Biaya Platform Bertingkat (Semakin Jauh, Persentase Semakin Kecil)
-
-  - Armada Mobil (Hemat / Reguler / XL):
-      - 0 – 5 km (Dekat): 6% dari tarif jarak (Min. Rp2.000)
-      - > 5 – 15 km (Menengah): 5% dari tarif jarak (Min. Rp2.500)
-      - > 15 – 30 km (Jauh): 3.5% dari tarif jarak
-      - > 30 km (Antar-Kecamatan / Luar Kota): 2.5% dari tarif jarak (Maks.
-        Rp12.000)
-  - Armada Motor (Ayo Motor):
-      - 0 – 5 km: 5% (Min. Rp1.000)
-      - > 5 – 15 km: 4% (Min. Rp1.500)
-      - > 15 – 30 km: 3%
-      - > 30 km: 2% (Maks. Rp5.000)
-
-(Angka dibulatkan rapi ke kelipatan Rp500 terdekat. Sebagai contoh: perjalanan 3
-km Mobil Reguler kini hanya kena biaya platform Rp2.000, turun drastis dari
-sebelumnya Rp10.000).
-
-2. Fitur Pembayaran QRIS (Siap Pakai untuk Bisnis Lokal)
-
-  - Tersedia pilihan metode bayar Tunai atau QRIS (GoPay, OVO, DANA, ShopeePay,
-    M-Banking).
-  - Jika memilih QRIS, tombol utama berubah menjadi "Bayar & Pesan dengan QRIS"
-    dan menampilkan pop-up Kode QRIS lengkap dengan:
-      - Total nominal tagihan & tombol Salin Nominal.
-      - Dukungan QRIS Dinamis Otomatis (jika Anda memasukkan String QRIS Statis
-        merchant Anda di menu Pengaturan Admin, aplikasi otomatis menyisipkan
-        nominal persis tagihan + menghitung ulang CRC-16 standar BI sehingga
-        penumpang tinggal scan tanpa ketik nominal) ATAU cukup Upload Foto QRIS
-        milik Anda dari galeri HP/komputer.
-      - Tombol "Saya Sudah Bayar & Kirim ke WA" untuk mengirim detail order ke
-        WhatsApp Admin agar penumpang tinggal melampirkan screenshot bukti bayar
-        QRIS.
-
-Kode Lengkap index.html Terbaru
-
-Salin seluruh kode di bawah ini untuk menggantikan isi index.html di repository
-GitHub / folder ayo-jalan Anda:
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -2239,15 +2194,3 @@ GitHub / folder ayo-jalan Anda:
   </script>
 </body>
 </html>
-
-Cara Mengaktifkan QRIS Asli Milik Anda:
-
-1.  Jika Anda ingin QRIS langsung aktif permanen untuk semua penumpang:
-      - Cara Paling Canggih (QRIS Dinamis): Scan foto QRIS toko/merchant Anda
-        menggunakan aplikasi QR Scanner biasa di HP untuk melihat teks kodenya
-        (berawalan 000201010211...), lalu tempel teks tersebut ke baris const
-        DEFAULT_QRIS_STRING = '...'; di dalam index.html (atau tempel lewat menu
-        Atur WA & QRIS di aplikasi). Setiap kali penumpang bayar QRIS, nominal
-        ongkos otomatis terisi sendiri tanpa penumpang perlu mengetik angka.
-      - Cara Paling Simpel (Upload Gambar): Klik Atur WA & QRIS di aplikasi,
-        lalu upload langsung foto/screenshot QRIS merchant Anda.
