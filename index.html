@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ayo Jalan - Kalkulator Tarif Taksi Online Bondowoso</title>
+  <title>Ayo Jalan - Kalkulator & Pesan Taksi/Ojek Online Bondowoso</title>
 
   <!-- PWA Manifest & Theme -->
   <link rel="manifest" href="./manifest.json" />
@@ -43,18 +43,15 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
   <style>
-    /* Sembunyikan panel instruksi bawaan Leaflet Routing Machine agar UI tetap bersih */
     .leaflet-routing-container {
       display: none !important;
     }
 
-    /* Custom Marker Pin */
     .custom-pin-wrapper {
       background: transparent;
       border: none;
     }
 
-    /* Animasi Denyut Pin GPS Perangkat */
     @keyframes gps-pulse {
       0% {
         transform: scale(0.95);
@@ -80,7 +77,6 @@
       animation: gps-pulse 2s infinite;
     }
 
-    /* Scrollbar rapi untuk dropdown autocomplete */
     .autocomplete-list::-webkit-scrollbar {
       width: 6px;
     }
@@ -89,7 +85,6 @@
       border-radius: 9999px;
     }
 
-    /* Pastikan peta punya z-index di bawah dropdown autocomplete */
     .leaflet-container {
       font-family: inherit;
       z-index: 10;
@@ -109,7 +104,7 @@
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Ayo Jalan</h1>
-          <p class="text-xs text-emerald-700 font-medium">Kalkulator Tarif Taksi Online • Bondowoso, Jawa Timur</p>
+          <p class="text-xs text-emerald-700 font-medium">Transportasi Online • Bondowoso, Jawa Timur</p>
         </div>
       </div>
 
@@ -132,7 +127,7 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- KOLOM KIRI: Form Pencarian, Pengaturan Tarif & Ringkasan Biaya -->
+      <!-- KOLOM KIRI: Form Pencarian, Pengaturan Tarif & Ringkasan + Order WA -->
       <div class="lg:col-span-5 space-y-5">
 
         <!-- Card 1: Penentuan Titik Rute -->
@@ -172,7 +167,7 @@
                   id="pickup-input"
                   type="text"
                   autocomplete="off"
-                  placeholder="Cari alamat di Bondowoso / Jatim atau klik peta..."
+                  placeholder="Ketik tempat di Bondowoso / klik peta..."
                   class="w-full pl-9 pr-16 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                 />
                 <div class="absolute right-2 flex items-center gap-1">
@@ -190,7 +185,7 @@
                 </div>
               </div>
               <!-- Dropdown Autocomplete Jemput -->
-              <ul id="pickup-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
+              <ul id="pickup-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
             </div>
 
             <!-- Input Titik Tujuan -->
@@ -202,7 +197,7 @@
                   id="dropoff-input"
                   type="text"
                   autocomplete="off"
-                  placeholder="Cari tujuan di Bondowoso / Jatim atau klik peta..."
+                  placeholder="Ketik tujuan di Bondowoso / klik peta..."
                   class="w-full pl-9 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                 />
                 <button id="btn-clear-dropoff" type="button" title="Hapus Titik Tujuan" class="hidden absolute right-2 p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">
@@ -212,13 +207,13 @@
                 </button>
               </div>
               <!-- Dropdown Autocomplete Tujuan -->
-              <ul id="dropoff-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
+              <ul id="dropoff-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
             </div>
           </div>
 
           <!-- Contoh Rute Populer Bondowoso -->
           <div class="mt-4 pt-3 border-t border-slate-100">
-            <p class="text-[11px] font-semibold text-slate-500 mb-2">Contoh Rute Populer (Bondowoso):</p>
+            <p class="text-[11px] font-semibold text-slate-500 mb-2">Rute Populer Bondowoso:</p>
             <div class="flex flex-wrap gap-1.5">
               <button type="button" class="preset-route text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium border border-emerald-200/70 transition"
                 data-p-lat="-7.9135" data-p-lng="113.8215" data-p-name="Alun-Alun RBA Ki Ronggo Bondowoso"
@@ -231,11 +226,20 @@
                 Citiplaza → RS Koesnadi
               </button>
               <button type="button" class="preset-route text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium border border-emerald-200/70 transition"
-                data-p-lat="-7.9135" data-p-lng="113.8215" data-p-name="Alun-Alun Bondowoso"
+                data-p-lat="-7.9135" data-p-lng="113.8215" data-p-name="Alun-Alun RBA Ki Ronggo Bondowoso"
                 data-d-lat="-8.0646" data-d-lng="114.1614" data-d-name="Kawah Wurung, Ijen, Bondowoso">
                 Alun-Alun → Kawah Wurung
               </button>
             </div>
+          </div>
+
+          <!-- Riwayat Rute Terakhir (localStorage) -->
+          <div id="recent-routes-container" class="hidden mt-3 pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-1.5">
+              <p class="text-[11px] font-semibold text-slate-500">Riwayat Pencarian Terakhir:</p>
+              <button id="btn-clear-history" type="button" class="text-[11px] text-slate-400 hover:text-rose-500 transition">Hapus</button>
+            </div>
+            <div id="recent-routes-list" class="space-y-1.5"></div>
           </div>
 
           <!-- Kotak Peringatan / Validasi Rute -->
@@ -247,11 +251,11 @@
           </div>
         </section>
 
-        <!-- Card 2: Pengaturan Tarif (Khusus Jawa Timur) -->
+        <!-- Card 2: Pengaturan Tarif (Khusus Jawa Timur + Bondowoso) -->
         <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
             <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
-            2. Pengaturan Tarif (Jawa Timur)
+            2. Pengaturan Layanan & Tarif
           </h2>
 
           <!-- Jarak Tempuh -->
@@ -276,43 +280,59 @@
             </div>
           </div>
 
-          <!-- Jenis Layanan -->
+          <!-- Jenis Layanan (Motor + Mobil Hemat, Reguler, XL) -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-2">Jenis Layanan</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <!-- Hemat -->
+            <label class="block text-xs font-semibold text-slate-600 mb-2">Jenis Armada & Layanan</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <!-- Ayo Motor -->
               <label class="cursor-pointer">
-                <input type="radio" name="service-type" value="3800" data-label="Hemat" class="peer sr-only" />
+                <input type="radio" name="service-type" value="2500" data-label="Ayo Motor (Roda 2)" data-min="8000" data-platform-min="3000" data-vehicle="Motor" class="peer sr-only" />
                 <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
                   <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-800">Hemat</span>
+                    <span class="text-xs font-bold text-slate-800">Ayo Motor</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold">Ojek</span>
+                  </div>
+                  <p class="text-xs font-bold text-emerald-700">Rp2.500<span class="font-normal text-slate-500">/km</span></p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp8.000</p>
+                </div>
+              </label>
+
+              <!-- Mobil Hemat -->
+              <label class="cursor-pointer">
+                <input type="radio" name="service-type" value="3800" data-label="Mobil Hemat" data-min="15000" data-platform-min="10000" data-vehicle="Mobil" class="peer sr-only" />
+                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800">Mobil Hemat</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Bawah</span>
                   </div>
                   <p class="text-xs font-bold text-emerald-700">Rp3.800<span class="font-normal text-slate-500">/km</span></p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
                 </div>
               </label>
 
-              <!-- Reguler -->
+              <!-- Mobil Reguler -->
               <label class="cursor-pointer">
-                <input type="radio" name="service-type" value="6000" data-label="Reguler / Standard" class="peer sr-only" checked />
+                <input type="radio" name="service-type" value="6000" data-label="Mobil Reguler" data-min="15000" data-platform-min="10000" data-vehicle="Mobil" class="peer sr-only" checked />
                 <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
                   <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold text-slate-800">Reguler</span>
+                    <span class="text-xs font-bold text-slate-800">Mobil Reguler</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">Standar</span>
                   </div>
                   <p class="text-xs font-bold text-emerald-700">Rp6.000<span class="font-normal text-slate-500">/km</span></p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
                 </div>
               </label>
 
-              <!-- XL / Prioritas -->
+              <!-- Mobil XL / Prioritas -->
               <label class="cursor-pointer">
-                <input type="radio" name="service-type" value="7500" data-label="XL / Prioritas" class="peer sr-only" />
+                <input type="radio" name="service-type" value="7500" data-label="Mobil XL / Prioritas" data-min="15000" data-platform-min="10000" data-vehicle="Mobil" class="peer sr-only" />
                 <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
                   <div class="flex items-center justify-between mb-1">
                     <span class="text-xs font-bold text-slate-800">XL / Prioritas</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">Atas</span>
                   </div>
                   <p class="text-xs font-bold text-emerald-700">Rp7.500<span class="font-normal text-slate-500">/km</span></p>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Min. Rp15.000</p>
                 </div>
               </label>
             </div>
@@ -348,9 +368,18 @@
             </div>
           </div>
 
+          <!-- Opsi Medan Pegunungan / Tanjakan Ekstrem (Ijen / Argopuro) -->
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-emerald-50/50 cursor-pointer transition">
+            <input id="mountain-toggle" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+            <div class="text-xs">
+              <p class="font-bold text-slate-800">Rute Pegunungan / Tanjakan Ekstrem (+20%)</p>
+              <p class="text-[11px] text-slate-500">Khusus tujuan wisata tinggi seperti Kawah Ijen, Kawah Wurung, atau lereng Argopuro.</p>
+            </div>
+          </label>
+
           <!-- Estimasi Tol & Parkir -->
           <div>
-            <label for="toll-input" class="block text-xs font-semibold text-slate-600 mb-1">Estimasi Biaya Tol & Parkir (Opsional)</label>
+            <label for="toll-input" class="block text-xs font-semibold text-slate-600 mb-1">Estimasi Biaya Tol, Tiket Masuk & Parkir (Opsional)</label>
             <div class="relative">
               <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
               <input
@@ -366,7 +395,7 @@
           </div>
         </section>
 
-        <!-- Card 3: Kartu Ringkasan & Rincian Biaya -->
+        <!-- Card 3: Kartu Ringkasan, Rincian Biaya & Pesan via WhatsApp -->
         <section class="bg-white rounded-2xl border-2 border-emerald-500/30 shadow-md overflow-hidden">
           <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-3.5 text-white flex items-center justify-between">
             <h2 class="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
@@ -375,7 +404,7 @@
               </svg>
               Rincian Estimasi Biaya
             </h2>
-            <span id="summary-service-badge" class="text-[11px] font-semibold bg-white/20 px-2.5 py-0.5 rounded-full">Reguler</span>
+            <span id="summary-service-badge" class="text-[11px] font-semibold bg-white/20 px-2.5 py-0.5 rounded-full">Mobil Reguler</span>
           </div>
 
           <div class="p-5 space-y-3 text-sm">
@@ -397,7 +426,10 @@
 
             <!-- Tarif Dasar Jarak -->
             <div class="flex items-center justify-between text-slate-700">
-              <span>Tarif Dasar Jarak</span>
+              <div>
+                <span>Tarif Jarak</span>
+                <span id="sum-min-badge" class="hidden ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Tarif Minimum</span>
+              </div>
               <span id="sum-base-fare" class="font-semibold">Rp0</span>
             </div>
 
@@ -412,18 +444,24 @@
               <span id="sum-surge-fee" class="font-semibold text-sm">+Rp0</span>
             </div>
 
+            <!-- Biaya Medan Pegunungan (Muncul jika dicentang) -->
+            <div id="row-mountain" class="hidden flex items-center justify-between text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
+              <span class="text-xs font-medium">Tambahan Medan Pegunungan (+20%)</span>
+              <span id="sum-mountain-fee" class="font-semibold text-sm">+Rp0</span>
+            </div>
+
             <!-- Biaya Jasa Aplikasi -->
             <div class="flex items-center justify-between text-slate-700">
               <div>
                 <span>Biaya Jasa Aplikasi & Platform</span>
-                <p class="text-[11px] text-slate-400">Min. Rp10.000 atau 5% tarif jarak</p>
+                <p id="sum-platform-note" class="text-[11px] text-slate-400">Min. Rp10.000 atau 5% tarif jarak</p>
               </div>
               <span id="sum-platform-fee" class="font-semibold">Rp0</span>
             </div>
 
             <!-- Biaya Tol & Parkir (Muncul jika > 0) -->
             <div id="row-toll" class="hidden flex items-center justify-between text-slate-700">
-              <span>Biaya Tol & Parkir</span>
+              <span>Biaya Tol / Parkir</span>
               <span id="sum-toll-fee" class="font-semibold">Rp0</span>
             </div>
 
@@ -431,9 +469,43 @@
             <div class="pt-3 border-t-2 border-emerald-100 flex items-end justify-between">
               <div>
                 <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Estimasi Akhir</p>
-                <p class="text-[11px] text-slate-400">Belum termasuk tips pengemudi</p>
+                <p class="text-[11px] text-slate-400">Bayar tunai / QRIS ke driver</p>
               </div>
               <p id="sum-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">Rp0</p>
+            </div>
+
+            <!-- Catatan Tambahan & Tombol Pesan WhatsApp -->
+            <div class="pt-3 border-t border-slate-100 space-y-2.5">
+              <div>
+                <label for="order-note" class="block text-[11px] font-semibold text-slate-500 mb-1">Catatan Penjemputan (Opsional)</label>
+                <input
+                  id="order-note"
+                  type="text"
+                  placeholder="Contoh: Pakai jaket biru, tunggu depan toko..."
+                  class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button id="btn-order-wa" type="button" class="sm:col-span-2 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm shadow-sm shadow-emerald-200 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969S17.547 2 12.031 2zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.531.078-1.203.109-1.938-.125-.453-.141-1.031-.328-1.766-.656-3.094-1.344-5.109-4.484-5.266-4.688-.156-.203-1.266-1.688-1.266-3.219s.797-2.281 1.078-2.594c.281-.313.609-.391.813-.391.203 0 .406 0 .594.016.188.016.438-.078.688.531.25.609.859 2.094.938 2.25.078.156.125.344.031.547-.094.203-.141.344-.297.516-.156.172-.313.391-.453.531-.156.141-.313.297-.141.594.172.297.781 1.281 1.672 2.078 1.156 1.031 2.125 1.344 2.422 1.484.297.141.469.125.641-.078.172-.203.75-.875.953-1.172.203-.297.406-.25.672-.156.266.094 1.703.797 2 .953.297.156.484.219.563.344.078.125.078.734-.172 1.438z"/>
+                  </svg>
+                  Pesan via WhatsApp
+                </button>
+                <button id="btn-copy-summary" type="button" class="inline-flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span id="copy-btn-text">Salin Info</span>
+                </button>
+              </div>
+
+              <!-- Konfigurasi Cepat No WA Admin -->
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                <span>Order ke WA Admin: <strong id="display-admin-wa" class="text-slate-600">+6281234567890</strong></span>
+                <button id="btn-edit-admin-wa" type="button" class="text-emerald-700 font-semibold hover:underline">Ubah No. WA</button>
+              </div>
             </div>
           </div>
         </section>
@@ -442,7 +514,6 @@
       <!-- KOLOM KANAN: Peta Interaktif Leaflet + OSRM -->
       <div class="lg:col-span-7 lg:sticky lg:top-20">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-2 relative">
-          <!-- Container Peta -->
           <div id="map" class="w-full h-[400px] sm:h-[480px] lg:h-[calc(100vh-8.5rem)] min-h-[400px] rounded-xl overflow-hidden bg-emerald-50"></div>
 
           <!-- Overlay Status Klik Peta (Kiri Bawah) -->
@@ -471,7 +542,7 @@
             </div>
           </div>
 
-          <!-- Tombol Kontrol Peta Kanan Atas (GPS Saya & Fokus Bondowoso) -->
+          <!-- Tombol Kontrol Peta Kanan Atas -->
           <div class="absolute top-5 right-5 z-20 flex items-center gap-2">
             <button id="btn-gps-center" type="button" title="Sesuaikan peta dengan titik GPS perangkat" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -509,13 +580,18 @@
   <script>
     (() => {
       // =========================================================================
-      // KONSTANTA & STATE APLIKASI (FOKUS BONDOWOSO, JAWA TIMUR)
+      // KONFIGURASI UTAMA (UBAH NOMOR WHATSAPP ADMIN DI SINI)
       // =========================================================================
-      const BONDOWOSO_CENTER = [-7.9135, 113.8215]; // Alun-Alun / Pusat Kota Bondowoso
+      const DEFAULT_ADMIN_WA = '6281234567890'; // Format internasional tanpa '+' (contoh: 6281234567890)
+      const STORAGE_KEYS = {
+        ADMIN_WA: 'ayojalan_admin_wa',
+        HISTORY: 'ayojalan_recent_routes'
+      };
+
+      const BONDOWOSO_CENTER = [-7.9135, 113.8215];
       const BONDOWOSO_ZOOM = 13;
       const GPS_ZOOM = 15;
 
-      // Bounding box operasional Provinsi Jawa Timur
       const JATIM_BBOX = {
         minLng: 110.85,
         minLat: -8.85,
@@ -523,21 +599,43 @@
         maxLat: -5.75
       };
 
+      // Daftar Lokasi Populer Bondowoso (Instan tanpa menunggu API)
+      const LOCAL_BONDOWOSO_POIS = [
+        { name: 'Alun-Alun RBA Ki Ronggo Bondowoso', area: 'Pusat Kota, Bondowoso', lat: -7.9135, lng: 113.8215 },
+        { name: 'Terminal Bondowoso', area: 'Jl. Imam Bonjol, Bondowoso', lat: -7.9158, lng: 113.8317 },
+        { name: 'Pasar Induk Bondowoso', area: 'Badean, Bondowoso', lat: -7.9139, lng: 113.8278 },
+        { name: 'Citiplaza Bondowoso', area: 'Nangkaan, Bondowoso', lat: -7.9277, lng: 113.8143 },
+        { name: 'RSUD dr. H. Koesnadi Bondowoso', area: 'Jl. Kapten Piere Tendean, Bondowoso', lat: -7.9189, lng: 113.8146 },
+        { name: 'Monumen Gerbong Maut / Stasiun Lama', area: 'Blindungan, Bondowoso', lat: -7.9175, lng: 113.8195 },
+        { name: 'Universitas Jember (UNEJ) Kampus Bondowoso', area: 'Poncogati, Kec. Curahdami', lat: -7.9135, lng: 113.7917 },
+        { name: 'Kawah Wurung (Wisata Alam)', area: 'Kec. Ijen, Bondowoso', lat: -8.0646, lng: 114.1614 },
+        { name: 'Kawasan Tapen / Bendung Sampean Baru', area: 'Kec. Tapen, Bondowoso', lat: -7.8620, lng: 113.9165 }
+      ];
+
       const state = {
-        pickup: null,   // { lat, lng, label }
-        dropoff: null,  // { lat, lng, label }
-        activeMapMode: 'pickup', // 'pickup' | 'dropoff'
+        pickup: null,
+        dropoff: null,
+        activeMapMode: 'pickup',
         routeDistanceKm: null,
         routeDurationSec: null,
         isManualDistance: false,
         pickupMarker: null,
         dropoffMarker: null,
         routingControl: null,
-        deviceGps: null,          // { lat, lng, accuracy }
+        deviceGps: null,
         deviceGpsMarker: null,
         deviceGpsCircle: null,
         hasAutoCenteredGps: false,
         gpsWatchId: null,
+        lastCalc: {
+          serviceLabel: 'Mobil Reguler',
+          ratePerKm: 6000,
+          surgeLabel: 'Normal (1.0x)',
+          isMountain: false,
+          totalFare: 0,
+          distanceKm: 0,
+          durationText: '-'
+        },
         searchAbortControllers: { pickup: null, dropoff: null }
       };
 
@@ -561,24 +659,38 @@
         btnCenterBondowoso: document.getElementById('btn-center-bondowoso'),
         modePickupBtn: document.getElementById('mode-pickup'),
         modeDropoffBtn: document.getElementById('mode-dropoff'),
+        recentContainer: document.getElementById('recent-routes-container'),
+        recentList: document.getElementById('recent-routes-list'),
+        btnClearHistory: document.getElementById('btn-clear-history'),
         routeAlert: document.getElementById('route-alert'),
         routeAlertText: document.getElementById('route-alert-text'),
         distanceInput: document.getElementById('distance-input'),
         distanceSourceBadge: document.getElementById('distance-source-badge'),
         btnSyncDistance: document.getElementById('btn-sync-distance'),
+        mountainToggle: document.getElementById('mountain-toggle'),
         tollInput: document.getElementById('toll-input'),
         summaryServiceBadge: document.getElementById('summary-service-badge'),
         sumDistance: document.getElementById('sum-distance'),
         sumDuration: document.getElementById('sum-duration'),
         sumRate: document.getElementById('sum-rate'),
+        sumMinBadge: document.getElementById('sum-min-badge'),
         sumBaseFare: document.getElementById('sum-base-fare'),
         rowSurge: document.getElementById('row-surge'),
         sumSurgeLabel: document.getElementById('sum-surge-label'),
         sumSurgeFee: document.getElementById('sum-surge-fee'),
+        rowMountain: document.getElementById('row-mountain'),
+        sumMountainFee: document.getElementById('sum-mountain-fee'),
+        sumPlatformNote: document.getElementById('sum-platform-note'),
         sumPlatformFee: document.getElementById('sum-platform-fee'),
         rowToll: document.getElementById('row-toll'),
         sumTollFee: document.getElementById('sum-toll-fee'),
         sumTotal: document.getElementById('sum-total'),
+        orderNote: document.getElementById('order-note'),
+        btnOrderWa: document.getElementById('btn-order-wa'),
+        btnCopySummary: document.getElementById('btn-copy-summary'),
+        copyBtnText: document.getElementById('copy-btn-text'),
+        displayAdminWa: document.getElementById('display-admin-wa'),
+        btnEditAdminWa: document.getElementById('btn-edit-admin-wa'),
         mapHintDot: document.getElementById('map-hint-dot'),
         mapHintText: document.getElementById('map-hint-text'),
         mapRouteBadge: document.getElementById('map-route-badge'),
@@ -681,6 +793,7 @@
           hideAlert();
         }
 
+        saveRecentRoute(state.pickup, state.dropoff);
         calculateFare();
       });
 
@@ -779,13 +892,9 @@
 
       function handleGpsError(err) {
         let msg = 'GPS perangkat tidak tersedia.';
-        if (err && err.code === 1) {
-          msg = 'Izin GPS ditolak. Peta tetap berfokus di Bondowoso.';
-        } else if (err && err.code === 2) {
-          msg = 'Sinyal GPS perangkat tidak ditemukan.';
-        } else if (err && err.code === 3) {
-          msg = 'Waktu deteksi GPS habis (timeout).';
-        }
+        if (err && err.code === 1) msg = 'Izin GPS ditolak. Peta tetap berfokus di Bondowoso.';
+        else if (err && err.code === 2) msg = 'Sinyal GPS perangkat tidak ditemukan.';
+        else if (err && err.code === 3) msg = 'Waktu deteksi GPS habis (timeout).';
         updateGpsHeaderBadge('error', 'GPS Nonaktif');
         return msg;
       }
@@ -805,9 +914,7 @@
             state.hasAutoCenteredGps = true;
             renderDeviceGpsOnMap(latitude, longitude, accuracy, shouldCenter);
           },
-          (err) => {
-            handleGpsError(err);
-          },
+          (err) => { handleGpsError(err); },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
         );
 
@@ -824,7 +931,7 @@
       }
 
       // =========================================================================
-      // FUNGSI HELPER FORMAT & VALIDASI
+      // HELPER FORMAT, VALIDASI & RIWAYAT LOKAL
       // =========================================================================
       function formatIDR(amount) {
         return new Intl.NumberFormat('id-ID', {
@@ -871,6 +978,65 @@
 
       function hideAlert() {
         el.routeAlert.classList.add('hidden');
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, (m) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+      }
+
+      // Riwayat Pencarian Terakhir (localStorage)
+      function loadRecentRoutes() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRecentRoute(pickup, dropoff) {
+        if (!pickup || !dropoff) return;
+        try {
+          let list = loadRecentRoutes();
+          const key = `${pickup.lat.toFixed(4)},${pickup.lng.toFixed(4)}->${dropoff.lat.toFixed(4)},${dropoff.lng.toFixed(4)}`;
+          list = list.filter(item => item.key !== key);
+          list.unshift({
+            key,
+            pickup: { ...pickup },
+            dropoff: { ...dropoff }
+          });
+          localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(list.slice(0, 4)));
+          renderRecentRoutes();
+        } catch {}
+      }
+
+      function renderRecentRoutes() {
+        const list = loadRecentRoutes();
+        if (!list.length) {
+          el.recentContainer.classList.add('hidden');
+          return;
+        }
+        el.recentContainer.classList.remove('hidden');
+        el.recentList.innerHTML = '';
+
+        list.forEach((item) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'w-full text-left px-3 py-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200/80 hover:border-emerald-200 transition flex items-center justify-between gap-2 text-xs';
+          btn.innerHTML = `
+            <span class="truncate font-medium text-slate-700">
+              ${escapeHtml(item.pickup.label)} <span class="text-emerald-600 font-bold mx-1">→</span> ${escapeHtml(item.dropoff.label)}
+            </span>
+            <span class="text-[10px] text-emerald-700 font-semibold shrink-0">Pakai</span>
+          `;
+          btn.addEventListener('click', () => {
+            setPoint('pickup', item.pickup.lat, item.pickup.lng, item.pickup.label, false);
+            setPoint('dropoff', item.dropoff.lat, item.dropoff.lng, item.dropoff.label, false);
+          });
+          el.recentList.appendChild(btn);
+        });
       }
 
       // =========================================================================
@@ -999,7 +1165,7 @@
       });
 
       // =========================================================================
-      // NOMINATIM API (PRIORITAS BONDOWOSO & JAWA TIMUR)
+      // PENCARIAN LOKASI: GABUNGAN LOKAL BONDOWOSO + NOMINATIM API
       // =========================================================================
       async function reverseGeocode(type, lat, lng) {
         try {
@@ -1022,9 +1188,7 @@
               showAlert(`Perhatian: Lokasi terdeteksi di "${stateName}", di luar wilayah operasional Provinsi Jawa Timur.`, 'warning');
             }
           }
-        } catch {
-          // Abaikan error jaringan reverse geocode
-        }
+        } catch {}
       }
 
       function formatNominatimShortName(item) {
@@ -1032,15 +1196,80 @@
         return parts.slice(0, 3).join(', ');
       }
 
-      async function searchNominatim(type, query) {
-        const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults;
-        const trimmed = query.trim();
+      function filterLocalPois(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) return LOCAL_BONDOWOSO_POIS.slice(0, 5);
+        return LOCAL_BONDOWOSO_POIS.filter(
+          poi => poi.name.toLowerCase().includes(q) || poi.area.toLowerCase().includes(q)
+        );
+      }
 
-        if (trimmed.length < 3) {
+      function renderAutocompleteList(type, localItems, osmItems = [], statusMsg = '') {
+        const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults;
+        listEl.innerHTML = '';
+
+        if (!localItems.length && !osmItems.length && !statusMsg) {
           listEl.classList.add('hidden');
-          listEl.innerHTML = '';
           return;
         }
+
+        // Render hasil lokal Bondowoso terlebih dahulu
+        localItems.forEach((poi) => {
+          const li = document.createElement('li');
+          li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
+          li.innerHTML = `
+            <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">★</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(poi.name)}</p>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold shrink-0">Bondowoso</span>
+              </div>
+              <p class="text-[11px] text-slate-500 truncate">${escapeHtml(poi.area)}</p>
+            </div>
+          `;
+          li.addEventListener('click', () => {
+            listEl.classList.add('hidden');
+            setPoint(type, poi.lat, poi.lng, poi.name, false);
+          });
+          listEl.appendChild(li);
+        });
+
+        // Render hasil Nominatim OpenStreetMap
+        osmItems.forEach((item) => {
+          const li = document.createElement('li');
+          li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
+          const mainTitle = item.display_name.split(',')[0];
+          const subTitle = item.display_name.split(',').slice(1, 4).join(', ');
+          li.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(mainTitle)}</p>
+              <p class="text-[11px] text-slate-500 truncate">${escapeHtml(subTitle)}</p>
+            </div>
+          `;
+          li.addEventListener('click', () => {
+            listEl.classList.add('hidden');
+            setPoint(type, item.lat, item.lon, formatNominatimShortName(item), false);
+          });
+          listEl.appendChild(li);
+        });
+
+        if (statusMsg) {
+          const statusLi = document.createElement('li');
+          statusLi.className = 'px-3.5 py-2 text-[11px] text-slate-400 bg-slate-50';
+          statusLi.textContent = statusMsg;
+          listEl.appendChild(statusLi);
+        }
+
+        listEl.classList.remove('hidden');
+      }
+
+      async function searchOsmNominatim(type, query, localMatches) {
+        const trimmed = query.trim();
+        if (trimmed.length < 3) return;
 
         if (state.searchAbortControllers[type]) {
           state.searchAbortControllers[type].abort();
@@ -1048,12 +1277,11 @@
         const controller = new AbortController();
         state.searchAbortControllers[type] = controller;
 
-        listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-slate-500">Mencari lokasi di Bondowoso & Jawa Timur...</li>`;
-        listEl.classList.remove('hidden');
+        renderAutocompleteList(type, localMatches, [], 'Mencari alamat lainnya di peta...');
 
         try {
           const viewbox = `${JATIM_BBOX.minLng},${JATIM_BBOX.maxLat},${JATIM_BBOX.maxLng},${JATIM_BBOX.minLat}`;
-          const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7&countrycodes=id&viewbox=${viewbox}&bounded=1&q=${encodeURIComponent(trimmed)}`;
+          const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&countrycodes=id&viewbox=${viewbox}&bounded=1&q=${encodeURIComponent(trimmed)}`;
 
           const res = await fetch(url, {
             signal: controller.signal,
@@ -1062,7 +1290,6 @@
           if (!res.ok) throw new Error('Gagal mencari');
           let results = await res.json();
 
-          // Prioritaskan hasil di Bondowoso terlebih dahulu, lalu Jawa Timur
           results.sort((a, b) => {
             const aName = (a.display_name || '').toLowerCase();
             const bName = (b.display_name || '').toLowerCase();
@@ -1071,43 +1298,19 @@
             return aScore - bScore;
           });
 
-          if (!results.length) {
-            listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-slate-500">Lokasi tidak ditemukan di wilayah Bondowoso / Jawa Timur.</li>`;
-            return;
-          }
-
-          listEl.innerHTML = '';
-          results.forEach((item) => {
-            const li = document.createElement('li');
-            li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
-            const mainTitle = item.display_name.split(',')[0];
-            const subTitle = item.display_name.split(',').slice(1, 4).join(', ');
-            li.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <div class="min-w-0">
-                <p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(mainTitle)}</p>
-                <p class="text-[11px] text-slate-500 truncate">${escapeHtml(subTitle)}</p>
-              </div>
-            `;
-            li.addEventListener('click', () => {
-              listEl.classList.add('hidden');
-              setPoint(type, item.lat, item.lon, formatNominatimShortName(item), false);
-            });
-            listEl.appendChild(li);
-          });
+          const noResultNote = (!localMatches.length && !results.length)
+            ? 'Lokasi tidak ditemukan. Coba klik langsung pada peta.'
+            : '';
+          renderAutocompleteList(type, localMatches, results, noResultNote);
         } catch (err) {
           if (err.name === 'AbortError') return;
-          listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-rose-600">Gagal memuat saran alamat. Silakan klik peta langsung.</li>`;
+          renderAutocompleteList(
+            type,
+            localMatches,
+            [],
+            localMatches.length ? '' : 'Gagal memuat saran peta. Gunakan klik peta.'
+          );
         }
-      }
-
-      function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, (m) => ({
-          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        })[m]);
       }
 
       function debounce(fn, delay) {
@@ -1140,34 +1343,57 @@
       function calculateFare() {
         const distanceKm = Math.max(0, parseFloat(el.distanceInput.value) || 0);
         const tollFee = Math.max(0, parseFloat(el.tollInput.value) || 0);
+        const isMountain = el.mountainToggle.checked;
 
         const selectedService = document.querySelector('input[name="service-type"]:checked');
         const ratePerKm = parseFloat(selectedService.value);
         const serviceLabel = selectedService.dataset.label;
+        const minFare = parseFloat(selectedService.dataset.min);
+        const platformMin = parseFloat(selectedService.dataset.platformMin);
+        const vehicleType = selectedService.dataset.vehicle;
 
         const selectedSurge = document.querySelector('input[name="surge-multiplier"]:checked');
         const surgeMultiplier = parseFloat(selectedSurge.value);
+        const surgeLabel = selectedSurge.dataset.label;
 
-        const baseDistanceFare = distanceKm * ratePerKm;
+        const rawDistanceFare = distanceKm * ratePerKm;
+        const isMinFareApplied = distanceKm > 0 && rawDistanceFare < minFare;
+        const baseDistanceFare = distanceKm > 0 ? Math.max(minFare, rawDistanceFare) : 0;
+
         const surgeFee = baseDistanceFare * (surgeMultiplier - 1);
+        const mountainFee = isMountain ? baseDistanceFare * 0.20 : 0;
 
         const hasTripData = distanceKm > 0 || tollFee > 0;
-        const platformFee = hasTripData ? Math.max(10000, baseDistanceFare * 0.05) : 0;
-        const totalFare = baseDistanceFare + surgeFee + platformFee + tollFee;
+        const platformFee = hasTripData ? Math.max(platformMin, baseDistanceFare * 0.05) : 0;
+        const totalFare = baseDistanceFare + surgeFee + mountainFee + platformFee + tollFee;
 
-        el.summaryServiceBadge.textContent = serviceLabel;
-        el.sumDistance.textContent = `${distanceKm.toFixed(distanceKm % 1 === 0 ? 0 : 2)} km`;
-
+        let durationText = '-';
         if (!state.isManualDistance && state.routeDurationSec !== null) {
-          el.sumDuration.textContent = formatDuration(state.routeDurationSec);
+          durationText = formatDuration(state.routeDurationSec);
         } else if (distanceKm > 0) {
-          const estSec = (distanceKm / 30) * 3600;
-          el.sumDuration.textContent = `~${formatDuration(estSec)} (estimasi)`;
-        } else {
-          el.sumDuration.textContent = '-';
+          const speed = vehicleType === 'Motor' ? 35 : 30;
+          const estSec = (distanceKm / speed) * 3600;
+          durationText = `~${formatDuration(estSec)} (estimasi)`;
         }
 
+        // Simpan hasil terakhir untuk pesan WhatsApp / Salin
+        state.lastCalc = {
+          serviceLabel,
+          ratePerKm,
+          surgeLabel,
+          isMountain,
+          totalFare,
+          distanceKm,
+          durationText
+        };
+
+        // Update UI Ringkasan
+        el.summaryServiceBadge.textContent = serviceLabel;
+        el.sumDistance.textContent = `${distanceKm.toFixed(distanceKm % 1 === 0 ? 0 : 2)} km`;
+        el.sumDuration.textContent = durationText;
         el.sumRate.textContent = `${formatIDR(ratePerKm)}/km`;
+
+        el.sumMinBadge.classList.toggle('hidden', !isMinFareApplied);
         el.sumBaseFare.textContent = formatIDR(baseDistanceFare);
 
         if (surgeMultiplier > 1.0) {
@@ -1178,6 +1404,14 @@
           el.rowSurge.classList.add('hidden');
         }
 
+        if (isMountain && baseDistanceFare > 0) {
+          el.rowMountain.classList.remove('hidden');
+          el.sumMountainFee.textContent = `+${formatIDR(mountainFee)}`;
+        } else {
+          el.rowMountain.classList.add('hidden');
+        }
+
+        el.sumPlatformNote.textContent = `Min. ${formatIDR(platformMin)} (${vehicleType}) atau 5% tarif jarak`;
         el.sumPlatformFee.textContent = formatIDR(platformFee);
 
         if (tollFee > 0) {
@@ -1191,21 +1425,83 @@
       }
 
       // =========================================================================
+      // WHATSAPP ORDER & SALIN RINCIAN
+      // =========================================================================
+      function getAdminWaNumber() {
+        const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_WA);
+        return (saved && /^\d{9,15}$/.test(saved)) ? saved : DEFAULT_ADMIN_WA;
+      }
+
+      function refreshAdminWaDisplay() {
+        const num = getAdminWaNumber();
+        el.displayAdminWa.textContent = `+${num}`;
+      }
+
+      function buildOrderMessage() {
+        const { serviceLabel, surgeLabel, isMountain, totalFare, distanceKm, durationText } = state.lastCalc;
+        const note = el.orderNote.value.trim();
+
+        const pickupText = state.pickup
+          ? `${state.pickup.label}\n   Maps: https://maps.google.com/?q=${state.pickup.lat},${state.pickup.lng}`
+          : '(Diisi manual)';
+        const dropoffText = state.dropoff
+          ? `${state.dropoff.label}\n   Maps: https://maps.google.com/?q=${state.dropoff.lat},${state.dropoff.lng}`
+          : '(Diisi manual)';
+
+        const lines = [
+          'Halo Admin *Ayo Jalan Bondowoso*! Saya ingin memesan perjalanan:',
+          '',
+          `🚘 *Layanan:* ${serviceLabel}`,
+          `📍 *Titik Jemput:* ${pickupText}`,
+          `🏁 *Titik Tujuan:* ${dropoffText}`,
+          `📏 *Jarak & Waktu:* ${distanceKm.toFixed(2)} km • ${durationText}`,
+          `⚡ *Kondisi:* ${surgeLabel}${isMountain ? ' + Medan Pegunungan' : ''}`,
+          `💰 *Estimasi Total:* ${formatIDR(totalFare)}`
+        ];
+
+        if (note) {
+          lines.push(`📝 *Catatan:* ${note}`);
+        }
+
+        lines.push('', 'Mohon konfirmasi ketersediaan driver. Terima kasih!');
+        return lines.join('\n');
+      }
+
+      // =========================================================================
       // EVENT LISTENERS
       // =========================================================================
-      const debouncedPickupSearch = debounce((val) => searchNominatim('pickup', val), 400);
-      const debouncedDropoffSearch = debounce((val) => searchNominatim('dropoff', val), 400);
+      const debouncedOsmPickup = debounce((val, localMatches) => searchOsmNominatim('pickup', val, localMatches), 400);
+      const debouncedOsmDropoff = debounce((val, localMatches) => searchOsmNominatim('dropoff', val, localMatches), 400);
+
+      function handleAddressInput(type, val) {
+        const localMatches = filterLocalPois(val);
+        renderAutocompleteList(type, localMatches);
+        if (val.trim().length >= 3) {
+          if (type === 'pickup') debouncedOsmPickup(val, localMatches);
+          else debouncedOsmDropoff(val, localMatches);
+        }
+      }
+
+      el.pickupInput.addEventListener('focus', () => {
+        const localMatches = filterLocalPois(el.pickupInput.value);
+        renderAutocompleteList('pickup', localMatches);
+      });
+
+      el.dropoffInput.addEventListener('focus', () => {
+        const localMatches = filterLocalPois(el.dropoffInput.value);
+        renderAutocompleteList('dropoff', localMatches);
+      });
 
       el.pickupInput.addEventListener('input', (e) => {
         const val = e.target.value;
         el.btnClearPickup.classList.toggle('hidden', val.length === 0);
-        debouncedPickupSearch(val);
+        handleAddressInput('pickup', val);
       });
 
       el.dropoffInput.addEventListener('input', (e) => {
         const val = e.target.value;
         el.btnClearDropoff.classList.toggle('hidden', val.length === 0);
-        debouncedDropoffSearch(val);
+        handleAddressInput('dropoff', val);
       });
 
       document.addEventListener('click', (e) => {
@@ -1283,6 +1579,11 @@
         });
       });
 
+      el.btnClearHistory.addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEYS.HISTORY);
+        renderRecentRoutes();
+      });
+
       el.distanceInput.addEventListener('input', () => {
         state.isManualDistance = true;
         updateDistanceBadge();
@@ -1301,9 +1602,54 @@
       document.querySelectorAll('input[name="service-type"], input[name="surge-multiplier"]').forEach((radio) => {
         radio.addEventListener('change', calculateFare);
       });
+      el.mountainToggle.addEventListener('change', calculateFare);
       el.tollInput.addEventListener('input', calculateFare);
 
-      // Fokus kembali ke Kota Bondowoso
+      // Tombol Pesan via WhatsApp
+      el.btnOrderWa.addEventListener('click', () => {
+        if (state.lastCalc.distanceKm <= 0) {
+          showAlert('Silakan tentukan Titik Penjemputan & Tujuan (atau isi jarak tempuh) terlebih dahulu sebelum memesan.', 'warning');
+          return;
+        }
+        const waNumber = getAdminWaNumber();
+        const message = buildOrderMessage();
+        const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+      });
+
+      // Tombol Salin Rincian
+      el.btnCopySummary.addEventListener('click', async () => {
+        if (state.lastCalc.distanceKm <= 0) {
+          showAlert('Belum ada rute atau jarak yang dihitung untuk disalin.', 'warning');
+          return;
+        }
+        const message = buildOrderMessage();
+        try {
+          await navigator.clipboard.writeText(message);
+          el.copyBtnText.textContent = 'Tersalin!';
+          setTimeout(() => { el.copyBtnText.textContent = 'Salin Info'; }, 2000);
+        } catch {
+          showAlert('Gagal menyalin otomatis. Silakan gunakan tombol Pesan via WhatsApp.', 'warning');
+        }
+      });
+
+      // Ubah No. WA Admin
+      el.btnEditAdminWa.addEventListener('click', () => {
+        const current = getAdminWaNumber();
+        const input = prompt('Masukkan nomor WhatsApp Admin Ayo Jalan (awalan 62, tanpa + atau spasi):\nContoh: 6281234567890', current);
+        if (input === null) return;
+        let cleaned = input.replace(/\D/g, '');
+        if (cleaned.startsWith('0')) {
+          cleaned = '62' + cleaned.slice(1);
+        }
+        if (/^\d{9,15}$/.test(cleaned)) {
+          localStorage.setItem(STORAGE_KEYS.ADMIN_WA, cleaned);
+          refreshAdminWaDisplay();
+        } else {
+          alert('Format nomor WhatsApp tidak valid. Masukkan angka seperti 6281234567890.');
+        }
+      });
+
       el.btnCenterBondowoso.addEventListener('click', () => {
         if (state.pickup && state.dropoff) {
           map.fitBounds(L.latLngBounds([
@@ -1321,6 +1667,8 @@
         state.isManualDistance = false;
         el.distanceInput.value = 0;
         el.tollInput.value = 0;
+        el.orderNote.value = '';
+        el.mountainToggle.checked = false;
         document.querySelector('input[name="service-type"][value="6000"]').checked = true;
         document.querySelector('input[name="surge-multiplier"][value="1.0"]').checked = true;
         setMapMode('pickup');
@@ -1335,8 +1683,10 @@
         }
       });
 
-      // Inisialisasi awal & deteksi GPS perangkat
+      // Inisialisasi awal
       setMapMode('pickup');
+      refreshAdminWaDisplay();
+      renderRecentRoutes();
       updateDistanceBadge();
       calculateFare();
       initDeviceGps();
