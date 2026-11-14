@@ -2,6 +2,7 @@ const CACHE_NAME = 'ayo-jalan-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './driver.html',
   './manifest.json'
 ];
 
