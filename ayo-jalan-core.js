@@ -1,14 +1,14 @@
 window.AYO_CONFIG = {
   // === PENGATURAN WAJIB (MODE WHATSAPP & QRIS) ===
-  ADMIN_WA: '6281234567890',          // Ganti dengan No. WA Admin (awalan 62)
+  ADMIN_WA: '6285785068226',          // Ganti dengan No. WA Admin (awalan 62)
   MERCHANT_NAME: 'AYO JALAN BONDOWOSO',
-  QRIS_STRING: '',                    // Tempel String QRIS Statis resmi Anda (000201...)
+  QRIS_STRING: '00020101021126610014COM.GO-JEK.WWW01189360091438346395280210G8346395280303UMI51440014ID.CO.QRIS.WWW0215ID10265474193030303UMI5204478953033605802ID5923Ayo Jalan, Transportasi6009BONDOWOSO61056821162070703A01630423B8',                    // Tempel String QRIS Statis resmi Anda (000201...)
   DRIVER_PIN: '1234',                 // PIN default mode offline/WA
   ADMIN_PIN: '9999',                  // PIN masuk ke admin.html
 
   // === OPSIONAL: ISI UNTUK MODE REAL-TIME OTOMATIS (SUPABASE GRATIS) ===
-  SUPABASE_URL: '',                   // Contoh: 'https://xyzcompany.supabase.co'
-  SUPABASE_ANON_KEY: ''               // Anon Public Key dari Project Settings -> API
+  SUPABASE_URL: 'https://mrqbjiqdaeoaqguvwebk.supabase.co',                   // Contoh: 'https://xyzcompany.supabase.co'
+  SUPABASE_ANON_KEY: 'sb_publishable_tydCnrRz9KoTET0aBfgSLQ_gLSPDk2k'               // Anon Public Key dari Project Settings -> API
 };
 
 window.AYO_CORE = (() => {
