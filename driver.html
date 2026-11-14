@@ -65,16 +65,16 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
-    <!-- RADAR ORDER REAL-TIME (OTOMATIS MUNCUL JIKA SUPABASE AKTIF) -->
+    <!-- RADAR ORDER REAL-TIME -->
     <div id="realtime-radar-box" class="hidden mb-4 bg-blue-50 border-2 border-blue-500 rounded-2xl p-4 shadow-md space-y-2.5">
       <div class="flex items-center justify-between">
         <p class="text-xs font-extrabold uppercase text-blue-800 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span> Order Masuk Real-Time</p>
-        <span class="text-[11px] text-blue-700 font-semibold">Siapa cepat dia dapat</span>
+        <span id="radar-gps-warning" class="text-[11px] text-blue-700 font-semibold">Siapa cepat dia dapat</span>
       </div>
       <div id="realtime-orders-list" class="space-y-2"></div>
     </div>
 
-    <!-- BANNER INFO PENUMPANG AKTIF (DARI WA ATAU REAL-TIME) -->
+    <!-- BANNER INFO PENUMPANG AKTIF -->
     <div id="incoming-order-banner" class="hidden mb-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-2">
       <div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -99,13 +99,13 @@
     </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- KOLOM PETA NAVIGASI IN-APP + KONTROL TAHAP ORDER -->
+      <!-- KOLOM PETA NAVIGASI + KONTROL TAHAP ORDER -->
       <div class="lg:col-span-7 order-1 lg:order-2 space-y-5">
         <section class="bg-white rounded-2xl border-2 border-emerald-600/30 shadow-md overflow-hidden">
           <div class="p-2 relative">
             <div id="map" class="w-full h-[380px] sm:h-[440px] lg:h-[470px] rounded-xl overflow-hidden bg-emerald-50"></div>
 
-            <!-- HUD NAVIGASI TURN-BY-TURN -->
+            <!-- HUD NAVIGASI -->
             <div id="nav-hud" class="hidden absolute top-4 left-4 right-4 z-20 pointer-events-none">
               <div id="nav-hud-card" class="pointer-events-auto bg-blue-700 text-white rounded-xl shadow-xl p-3.5 flex items-center gap-3.5 border border-white/20">
                 <div id="nav-turn-icon" class="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0"></div>
@@ -128,32 +128,65 @@
             <div id="map-loading" class="hidden absolute inset-2 rounded-xl bg-white/60 z-30 flex items-center justify-center"><div class="bg-white px-4 py-2 rounded-xl shadow-md text-xs font-semibold text-emerald-800">Menghitung rute...</div></div>
           </div>
 
-          <div class="px-4 py-3.5 bg-slate-50 border-t border-slate-200">
-            <div class="flex items-center justify-between text-[11px] font-bold mb-3 px-1">
+          <!-- PANEL AKSI TAHAP ORDER DENGAN KUNCI GEOFENCE GPS -->
+          <div class="px-4 py-3.5 bg-slate-50 border-t border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between text-[11px] font-bold px-1">
               <span id="step-dot-1" class="text-emerald-700">1. Ambil Order</span><span class="text-slate-300">→</span>
               <span id="step-dot-2" class="text-slate-400">2. Menuju Jemput</span><span class="text-slate-300">→</span>
               <span id="step-dot-3" class="text-slate-400">3. Antar Tujuan</span><span class="text-slate-300">→</span>
               <span id="step-dot-4" class="text-slate-400">4. Bayar</span>
             </div>
 
+            <!-- Panel Idle -->
             <div id="stage-panel-idle" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div><p class="text-xs font-bold">Siap Menjalankan Order</p><p id="idle-route-preview" class="text-[11px] text-slate-500">Pilih titik jemput &amp; tujuan, lalu mulai navigasi.</p></div>
-              <button id="btn-start-pickup-nav" type="button" class="shrink-0 py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm">🚗 Ambil Order &amp; Navigasi Jemput</button>
+              <div>
+                <p class="text-xs font-bold">Siap Menjalankan Order</p>
+                <p id="idle-route-preview" class="text-[11px] text-slate-500">Pilih titik jemput &amp; tujuan, lalu mulai navigasi.</p>
+                <p id="idle-gps-req" class="text-[11px] font-semibold text-amber-700 mt-0.5"></p>
+              </div>
+              <button id="btn-start-pickup-nav" type="button" class="shrink-0 py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-sm shadow-sm transition">
+                🚗 Ambil Order &amp; Navigasi Jemput
+              </button>
             </div>
 
-            <div id="stage-panel-pickup" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div><p class="text-xs font-bold text-blue-700">Menuju Titik Penjemputan</p><p id="pickup-target-label" class="text-xs font-semibold truncate max-w-xs">-</p></div>
-              <div class="flex gap-2">
-                <button id="btn-cancel-nav" type="button" class="py-3 px-3 rounded-xl bg-slate-200 text-slate-700 font-semibold text-xs">Batal</button>
-                <button id="btn-confirm-pickup" type="button" class="py-3 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm">✓ Jemput Penumpang</button>
+            <!-- Panel Menuju Jemput (Terkunci jika > 200m dari Titik Jemput) -->
+            <div id="stage-panel-pickup" class="hidden space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-bold text-blue-700">Menuju Titik Penjemputan</p>
+                  <p id="pickup-target-label" class="text-xs font-semibold truncate max-w-xs">-</p>
+                  <p id="pickup-geofence-info" class="text-[11px] font-semibold text-amber-700 mt-0.5">Mengukur jarak GPS ke titik jemput...</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                  <button id="btn-cancel-nav" type="button" class="py-3 px-3 rounded-xl bg-slate-200 text-slate-700 font-semibold text-xs">Batal</button>
+                  <button id="btn-confirm-pickup" type="button" disabled class="py-3 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-sm transition">
+                    🔒 Jemput Penumpang
+                  </button>
+                </div>
+              </div>
+              <div class="text-right">
+                <button id="btn-override-pickup" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button>
               </div>
             </div>
 
-            <div id="stage-panel-dropoff" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div><p class="text-xs font-bold text-emerald-700">Penumpang Naik • Menuju Tujuan</p><p id="dropoff-target-label" class="text-xs font-semibold truncate max-w-xs">-</p></div>
-              <button id="btn-confirm-arrived" type="button" class="shrink-0 py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">🏁 Sudah Sampai Tujuan</button>
+            <!-- Panel Menuju Tujuan (Terkunci jika > 200m dari Titik Tujuan) -->
+            <div id="stage-panel-dropoff" class="hidden space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-bold text-emerald-700">Penumpang Naik • Menuju Tujuan</p>
+                  <p id="dropoff-target-label" class="text-xs font-semibold truncate max-w-xs">-</p>
+                  <p id="dropoff-geofence-info" class="text-[11px] font-semibold text-amber-700 mt-0.5">Mengukur jarak GPS ke titik tujuan...</p>
+                </div>
+                <button id="btn-confirm-arrived" type="button" disabled class="shrink-0 py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-sm transition">
+                  🔒 Sudah Sampai Tujuan
+                </button>
+              </div>
+              <div class="text-right">
+                <button id="btn-override-dropoff" type="button" class="text-[10px] text-slate-400 hover:text-emerald-700 underline">Kendala GPS lemah? Buka paksa (PIN Admin)</button>
+              </div>
             </div>
 
+            <!-- Panel Sudah Sampai & Transaksi -->
             <div id="stage-panel-arrived" class="hidden space-y-3">
               <div class="flex items-center justify-between bg-emerald-100/70 border border-emerald-300 rounded-xl px-3.5 py-2.5">
                 <div><p class="text-xs font-bold text-emerald-900">🏁 Sudah Sampai Tujuan!</p><p class="text-[11px] text-emerald-800">Pilih transaksi pembayaran penumpang:</p></div>
@@ -246,11 +279,14 @@
               <div><p class="text-xs font-bold uppercase text-slate-500">Total Tagihan</p><p class="text-xs font-semibold text-emerald-700">Hak Bersih: <span id="sum-driver-net">Rp0</span></p></div>
               <p id="sum-total" class="text-2xl sm:text-3xl font-extrabold">Rp0</p>
             </div>
-            <div class="pt-3 grid grid-cols-2 gap-2">
-              <button id="btn-show-qris" type="button" class="py-2.5 px-3 rounded-xl bg-blue-600 text-white font-bold text-xs">Bayar QRIS Terpusat</button>
-              <button id="btn-save-trip" type="button" class="py-2.5 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs">✓ Catat Trip Tunai</button>
+            <div class="pt-3 space-y-1.5">
+              <p id="kasir-gps-lock-note" class="text-[11px] font-semibold text-amber-700">🔒 Transaksi kasir terbuka setelah tiba di titik tujuan (≤ 200m).</p>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="btn-show-qris" type="button" disabled class="py-2.5 px-3 rounded-xl bg-blue-600 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-xs transition">Bayar QRIS Terpusat</button>
+                <button id="btn-save-trip" type="button" disabled class="py-2.5 px-3 rounded-xl bg-emerald-600 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-xs transition">✓ Catat Trip Tunai</button>
+              </div>
+              <button id="btn-send-receipt" type="button" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200">Kirim Struk ke WA Penumpang</button>
             </div>
-            <button id="btn-send-receipt" type="button" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200">Kirim Struk ke WA Penumpang</button>
           </div>
         </section>
       </div>
@@ -288,9 +324,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
   <script>
     (async () => {
-      const C = window.AYO_CORE;
-      const CFG = window.AYO_CONFIG;
-      const sb = C.getSupabase();
+      const C = window.AYO_CORE, CFG = window.AYO_CONFIG, sb = C.getSupabase();
+      const RADIUS_M = CFG.GPS_CHECKIN_RADIUS_M || 200;
       let tariffs = await C.fetchActiveTariffs();
 
       const KEYS = { UNLOCKED: 'ayojalan_drv_unlocked', DRIVER_ID: 'ayojalan_drv_id', PROFILE: 'ayojalan_drv_profile_v1', TRIPS: 'ayojalan_drv_trips_v2', WITHDRAWS: 'ayojalan_drv_withdraws_v1' };
@@ -302,6 +337,7 @@
         tripStage: 'idle', routeDistanceKm: null, routeDurationSec: null, isManualDistance: false,
         pickupMarker: null, dropoffMarker: null, tripRouteLine: null, navRouteLine: null,
         deviceGps: null, deviceGpsMarker: null, followGps: true, voiceEnabled: true,
+        gpsOverridePickup: false, gpsOverrideDropoff: false,
         wakeLock: null, navCoords: [], navSteps: [], navStepIdx: 0, lastNavFetchTime: 0, lastSpokenKey: '',
         walletBalance: 0, lastCalc: {}, searchAbort: { pickup: null, dropoff: null }
       };
@@ -311,7 +347,7 @@
         pinHint: document.getElementById('pin-incoming-hint'), pinInput: document.getElementById('pin-input'),
         pinErr: document.getElementById('pin-error'), btnUnlock: document.getElementById('btn-unlock-pin'),
         gpsText: document.getElementById('gps-live-text'), wakeBadge: document.getElementById('wakelock-badge'),
-        radarBox: document.getElementById('realtime-radar-box'), radarList: document.getElementById('realtime-orders-list'),
+        radarBox: document.getElementById('realtime-radar-box'), radarWarn: document.getElementById('radar-gps-warning'), radarList: document.getElementById('realtime-orders-list'),
         inBanner: document.getElementById('incoming-order-banner'), inTitle: document.getElementById('incoming-pax-title'),
         inMeta: document.getElementById('incoming-pax-meta'), btnWaPax: document.getElementById('btn-wa-pax'),
         btnCallPax: document.getElementById('btn-call-pax'), btnDismissBanner: document.getElementById('btn-dismiss-banner'),
@@ -325,9 +361,9 @@
         navText: document.getElementById('nav-instruction-text'), navEta: document.getElementById('nav-remaining-eta'),
         btnVoice: document.getElementById('btn-toggle-voice'), btnFollow: document.getElementById('btn-follow-gps'), btnBws: document.getElementById('btn-center-bondowoso'),
         dots: [1,2,3,4].map(i => document.getElementById(`step-dot-${i}`)),
-        pIdle: document.getElementById('stage-panel-idle'), idlePrev: document.getElementById('idle-route-preview'), btnStartNav: document.getElementById('btn-start-pickup-nav'),
-        pPickup: document.getElementById('stage-panel-pickup'), pickLbl: document.getElementById('pickup-target-label'), btnCancelNav: document.getElementById('btn-cancel-nav'), btnConfirmPick: document.getElementById('btn-confirm-pickup'),
-        pDropoff: document.getElementById('stage-panel-dropoff'), dropLbl: document.getElementById('dropoff-target-label'), btnConfirmArr: document.getElementById('btn-confirm-arrived'),
+        pIdle: document.getElementById('stage-panel-idle'), idlePrev: document.getElementById('idle-route-preview'), idleGpsReq: document.getElementById('idle-gps-req'), btnStartNav: document.getElementById('btn-start-pickup-nav'),
+        pPickup: document.getElementById('stage-panel-pickup'), pickLbl: document.getElementById('pickup-target-label'), pickGeoInfo: document.getElementById('pickup-geofence-info'), btnCancelNav: document.getElementById('btn-cancel-nav'), btnConfirmPick: document.getElementById('btn-confirm-pickup'), btnOverridePick: document.getElementById('btn-override-pickup'),
+        pDropoff: document.getElementById('stage-panel-dropoff'), dropLbl: document.getElementById('dropoff-target-label'), dropGeoInfo: document.getElementById('dropoff-geofence-info'), btnConfirmArr: document.getElementById('btn-confirm-arrived'), btnOverrideDrop: document.getElementById('btn-override-dropoff'),
         pArrived: document.getElementById('stage-panel-arrived'), arrBadge: document.getElementById('arrived-total-badge'), btnArrQris: document.getElementById('btn-arrived-qris'), btnArrCash: document.getElementById('btn-arrived-cash'),
         pickupIn: document.getElementById('pickup-input'), dropoffIn: document.getElementById('dropoff-input'),
         pickupRes: document.getElementById('pickup-results'), dropoffRes: document.getElementById('dropoff-results'),
@@ -341,7 +377,7 @@
         sumPlatPct: document.getElementById('sum-platform-pct'), sumPlatFee: document.getElementById('sum-platform-fee'),
         rowToll: document.getElementById('row-toll'), sumTollFee: document.getElementById('sum-toll-fee'),
         sumNet: document.getElementById('sum-driver-net'), sumTotal: document.getElementById('sum-total'),
-        btnQris: document.getElementById('btn-show-qris'), btnSaveTrip: document.getElementById('btn-save-trip'), btnReceipt: document.getElementById('btn-send-receipt'),
+        kasirLockNote: document.getElementById('kasir-gps-lock-note'), btnQris: document.getElementById('btn-show-qris'), btnSaveTrip: document.getElementById('btn-save-trip'), btnReceipt: document.getElementById('btn-send-receipt'),
         dispAcc: document.getElementById('display-payout-account'), dispDrv: document.getElementById('display-driver-name-badge'),
         wdInput: document.getElementById('withdraw-amount-input'), btnWdMax: document.getElementById('btn-withdraw-max'), btnReqWd: document.getElementById('btn-request-withdraw'),
         wdBox: document.getElementById('withdraw-history-box'), wdList: document.getElementById('withdraw-log-list'),
@@ -357,49 +393,143 @@
 
       if (sb) el.loginPhone.classList.remove('hidden');
 
-      // === SCREEN WAKE LOCK API (LAYAR ANTI-MATI SAAT NAVIGASI) ===
-      async function manageWakeLock(shouldKeepAwake) {
-        if (!('wakeLock' in navigator)) return;
-        try {
-          if (shouldKeepAwake && !state.wakeLock) {
-            state.wakeLock = await navigator.wakeLock.request('screen');
-            el.wakeBadge.textContent = 'Layar: Anti-Mati Aktif';
-            state.wakeLock.addEventListener('release', () => { state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal'; });
-          } else if (!shouldKeepAwake && state.wakeLock) {
-            await state.wakeLock.release();
-            state.wakeLock = null;
-            el.wakeBadge.textContent = 'Layar: Normal';
-          }
-        } catch {}
-      }
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff')) manageWakeLock(true);
-      });
-
-      // === PETA & HELPER JARAK ===
-      const map = L.map('map', { center: C.BONDOWOSO_CENTER, zoom: C.BONDOWOSO_ZOOM });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
-      map.on('dragstart', () => { if (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff') { state.followGps = false; updateFollowUI(); } });
-
-      function pinIcon(type) {
-        const bg = type === 'pickup' ? '#059669' : '#e11d48', lbl = type === 'pickup' ? 'JEMPUT' : 'TUJUAN';
-        return L.divIcon({ className: 'custom-pin-wrapper', html: `<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);"><span style="background:${bg};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;margin-bottom:2px;">${lbl}</span><svg width="26" height="32" viewBox="0 0 24 30" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12C0 20.25 12 30 12 30C12 30 24 20.25 24 12C24 5.373 18.627 0 12 0Z" fill="${bg}"/><circle cx="12" cy="11.5" r="4.5" fill="white"/></svg></div>`, iconSize: [0, 0], iconAnchor: [0, 0] });
-      }
-
       function haversineM(lat1, lng1, lat2, lng2) {
         const R = 6371000, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       }
 
-      // Deteksi jarak ke garis rute terdekat (untuk Auto-Reroute jika salah belok > 45m)
+      // === VALIDASI KETAT TITIK GPS TERHADAP TOMBOL JEMPUT, SAMPAI & BAYAR ===
+      function updateGeofenceButtons() {
+        const hasGps = !!state.deviceGps;
+        const hasRoute = !!(state.pickup && state.dropoff);
+
+        // 1. Tombol Ambil Order (Wajib GPS aktif + Rute lengkap)
+        const canStart = hasGps && hasRoute;
+        el.btnStartNav.disabled = !canStart;
+        if (!hasGps) {
+          el.idleGpsReq.textContent = '🔒 Aktifkan GPS HP Anda untuk mengambil order & navigasi.';
+          el.radarWarn.textContent = '🔒 Aktifkan GPS untuk ambil order';
+        } else if (!hasRoute) {
+          el.idleGpsReq.textContent = '';
+          el.radarWarn.textContent = 'GPS Aktif • Siapa cepat dia dapat';
+        } else {
+          el.idleGpsReq.textContent = `✓ GPS Aktif. Siap navigasi ke titik jemput.`;
+          el.idleGpsReq.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
+        }
+
+        // Update tombol di Radar Real-Time jika ada
+        el.radarList.querySelectorAll('.btn-claim-order').forEach(btn => {
+          btn.disabled = !hasGps;
+          btn.textContent = hasGps ? 'Ambil Order' : '🔒 GPS Mati';
+        });
+
+        // 2. Tombol Jemput Penumpang (Wajib GPS <= 200m dari Titik Jemput)
+        if (state.pickup) {
+          if (state.gpsOverridePickup) {
+            el.btnConfirmPick.disabled = false;
+            el.btnConfirmPick.textContent = '✓ Jemput Penumpang';
+            el.pickGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.';
+            el.pickGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
+          } else if (!hasGps) {
+            el.btnConfirmPick.disabled = true;
+            el.btnConfirmPick.textContent = '🔒 Jemput Penumpang';
+            el.pickGeoInfo.textContent = '🔒 GPS tidak aktif. Tidak dapat verifikasi posisi jemput.';
+            el.pickGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
+          } else {
+            const distPick = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.pickup.lat, state.pickup.lng);
+            const inRange = distPick <= RADIUS_M;
+            el.btnConfirmPick.disabled = !inRange;
+            el.btnConfirmPick.textContent = inRange ? '✓ Jemput Penumpang' : '🔒 Jemput Penumpang';
+            const distStr = distPick >= 1000 ? `${(distPick / 1000).toFixed(2)} km` : `${Math.round(distPick)} m`;
+            el.pickGeoInfo.textContent = inRange
+              ? `✓ Anda di titik jemput (${distStr}). Silakan klik Jemput!`
+              : `🔒 Jarak ke titik jemput: ${distStr} (Aktif otomatis saat ≤ ${RADIUS_M} m)`;
+            el.pickGeoInfo.className = `text-[11px] font-semibold mt-0.5 ${inRange ? 'text-emerald-700' : 'text-amber-700'}`;
+          }
+        }
+
+        // 3. Tombol Sudah Sampai Tujuan (Wajib GPS <= 200m dari Titik Tujuan)
+        let atDropoff = false;
+        if (state.dropoff) {
+          if (state.gpsOverrideDropoff) {
+            atDropoff = true;
+            el.btnConfirmArr.disabled = false;
+            el.btnConfirmArr.textContent = '🏁 Sudah Sampai Tujuan';
+            el.dropGeoInfo.textContent = '✓ Dibuka dengan verifikasi Admin.';
+            el.dropGeoInfo.className = 'text-[11px] font-semibold text-emerald-700 mt-0.5';
+          } else if (!hasGps) {
+            el.btnConfirmArr.disabled = true;
+            el.btnConfirmArr.textContent = '🔒 Sudah Sampai Tujuan';
+            el.dropGeoInfo.textContent = '🔒 GPS tidak aktif. Tidak dapat verifikasi lokasi tujuan.';
+            el.dropGeoInfo.className = 'text-[11px] font-semibold text-rose-600 mt-0.5';
+          } else {
+            const distDrop = haversineM(state.deviceGps.lat, state.deviceGps.lng, state.dropoff.lat, state.dropoff.lng);
+            atDropoff = distDrop <= RADIUS_M;
+            el.btnConfirmArr.disabled = !atDropoff;
+            el.btnConfirmArr.textContent = atDropoff ? '🏁 Sudah Sampai Tujuan' : '🔒 Sudah Sampai Tujuan';
+            const distStr = distDrop >= 1000 ? `${(distDrop / 1000).toFixed(2)} km` : `${Math.round(distDrop)} m`;
+            el.dropGeoInfo.textContent = atDropoff
+              ? `✓ Anda sudah tiba di tujuan (${distStr}). Klik Sudah Sampai!`
+              : `🔒 Jarak ke tujuan: ${distStr} (Aktif otomatis saat ≤ ${RADIUS_M} m)`;
+            el.dropGeoInfo.className = `text-[11px] font-semibold mt-0.5 ${atDropoff ? 'text-emerald-700' : 'text-amber-700'}`;
+          }
+        }
+
+        // 4. Tombol Kasir (Bayar QRIS / Catat Trip Tunai)
+        const canPay = (state.tripStage === 'arrived') || (state.tripStage === 'idle' && atDropoff && state.lastCalc.totalFare > 0);
+        el.btnQris.disabled = !canPay;
+        el.btnSaveTrip.disabled = !canPay;
+        if (canPay) {
+          el.kasirLockNote.textContent = '✓ Anda berada di titik tujuan. Transaksi pembayaran siap diproses.';
+          el.kasirLockNote.className = 'text-[11px] font-semibold text-emerald-700';
+        } else {
+          el.kasirLockNote.textContent = `🔒 Transaksi kasir terkunci sampai GPS tiba di tujuan (≤ ${RADIUS_M} m) & klik "Sudah Sampai".`;
+          el.kasirLockNote.className = 'text-[11px] font-semibold text-amber-700';
+        }
+      }
+
+      // Override Darurat (Khusus PIN Admin) jika sinyal GPS gunung bermasalah
+      el.btnOverridePick.addEventListener('click', () => {
+        const pin = prompt('Masukkan PIN Admin untuk buka paksa tombol Jemput:');
+        if (pin === CFG.ADMIN_PIN) { state.gpsOverridePickup = true; updateGeofenceButtons(); }
+        else if (pin !== null) alert('PIN Admin salah.');
+      });
+      el.btnOverrideDrop.addEventListener('click', () => {
+        const pin = prompt('Masukkan PIN Admin untuk buka paksa tombol Sudah Sampai:');
+        if (pin === CFG.ADMIN_PIN) { state.gpsOverrideDropoff = true; updateGeofenceButtons(); }
+        else if (pin !== null) alert('PIN Admin salah.');
+      });
+
+      // === SCREEN WAKE LOCK ===
+      async function manageWakeLock(keepAwake) {
+        if (!('wakeLock' in navigator)) return;
+        try {
+          if (keepAwake && !state.wakeLock) {
+            state.wakeLock = await navigator.wakeLock.request('screen');
+            el.wakeBadge.textContent = 'Layar: Anti-Mati';
+            state.wakeLock.addEventListener('release', () => { state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal'; });
+          } else if (!keepAwake && state.wakeLock) {
+            await state.wakeLock.release(); state.wakeLock = null; el.wakeBadge.textContent = 'Layar: Normal';
+          }
+        } catch {}
+      }
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff')) manageWakeLock(true); });
+
+      // === PETA & NAVIGASI ===
+      const map = L.map('map', { center: C.BONDOWOSO_CENTER, zoom: C.BONDOWOSO_ZOOM });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+      map.on('dragstart', () => { if (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff') { state.followGps = false; updateFollowUI(); } });
+
+      function pinIcon(type) {
+        const bg = type === 'pickup' ? '#059669' : '#e11d48', lbl = type === 'pickup' ? 'JEMPUT' : 'TUJUAN';
+        return L.divIcon({ className: 'custom-pin-wrapper', html: `<div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);"><span style="background:${bg};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;margin-bottom:2px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${lbl}</span><svg width="26" height="32" viewBox="0 0 24 30" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12C0 20.25 12 30 12 30C12 30 24 20.25 24 12C24 5.373 18.627 0 12 0Z" fill="${bg}"/><circle cx="12" cy="11.5" r="4.5" fill="white"/></svg></div>`, iconSize: [0, 0], iconAnchor: [0, 0] });
+      }
+
       function minDistanceToRouteM(lat, lng, coords) {
         if (!coords || !coords.length) return 0;
         let min = Infinity;
-        for (let i = 0; i < coords.length; i++) {
-          const d = haversineM(lat, lng, coords[i][0], coords[i][1]);
-          if (d < min) min = d;
-        }
+        for (let i = 0; i < coords.length; i++) { const d = haversineM(lat, lng, coords[i][0], coords[i][1]); if (d < min) min = d; }
         return min;
       }
 
@@ -454,22 +584,18 @@
           el.alert.className = 'mt-3 p-2.5 rounded-xl text-xs font-medium border bg-rose-50 text-rose-700 border-rose-200';
           el.alert.textContent = 'Rute tidak ditemukan. Isi jarak manual di bawah.';
         }
+        updateGeofenceButtons();
       }
 
-      // === NAVIGASI AUTO-ADVANCE & AUTO-REROUTE ===
       async function updateActiveNav(force = false) {
         if (state.tripStage !== 'to_pickup' && state.tripStage !== 'to_dropoff') return;
         const target = state.tripStage === 'to_pickup' ? state.pickup : state.dropoff;
         if (!target) return;
-        const origin = state.deviceGps || (state.tripStage === 'to_dropoff' ? state.pickup : null);
-        if (!origin) {
-          el.navHud.classList.remove('hidden'); el.navText.textContent = 'Menunggu sinyal GPS...'; el.navEta.textContent = `Tujuan: ${target.label}`;
-          return;
-        }
+        const origin = state.deviceGps;
+        if (!origin) { el.navHud.classList.remove('hidden'); el.navText.textContent = 'Menunggu sinyal GPS...'; return; }
 
         const offRoute = state.navCoords.length > 0 && minDistanceToRouteM(origin.lat, origin.lng, state.navCoords) > 45;
         const now = Date.now();
-
         if (force || offRoute || !state.navSteps.length || (now - state.lastNavFetchTime > 12000)) {
           if (offRoute && !force) speak('Menghitung ulang rute.');
           state.lastNavFetchTime = now;
@@ -478,7 +604,6 @@
             state.navCoords = r.geometry.coordinates.map(c => [c[1], c[0]]);
             state.navSteps = (r.legs && r.legs[0] && r.legs[0].steps) ? r.legs[0].steps : [];
             state.navStepIdx = state.navSteps.length > 1 ? 1 : 0;
-
             if (state.navRouteLine) map.removeLayer(state.navRouteLine);
             state.navRouteLine = L.polyline(state.navCoords, { color: state.tripStage === 'to_pickup' ? '#2563eb' : '#059669', weight: 7, opacity: 0.92 }).addTo(map);
             el.navEta.textContent = `Sisa: ${(r.distance / 1000).toFixed(2)} km • Estimasi: ${C.formatDuration(r.duration)}`;
@@ -486,27 +611,19 @@
           } catch {}
         }
 
-        // Auto-Advance ke belokan berikutnya jika belokan aktif sudah terlewati (< 30m)
         while (state.navStepIdx < state.navSteps.length - 1) {
-          const cur = state.navSteps[state.navStepIdx];
-          const loc = cur.maneuver && cur.maneuver.location;
-          if (loc && haversineM(origin.lat, origin.lng, loc[1], loc[0]) < 30) state.navStepIdx++;
-          else break;
+          const cur = state.navSteps[state.navStepIdx], loc = cur.maneuver && cur.maneuver.location;
+          if (loc && haversineM(origin.lat, origin.lng, loc[1], loc[0]) < 30) state.navStepIdx++; else break;
         }
 
         const step = state.navSteps[state.navStepIdx] || state.navSteps[0];
         if (step) {
-          const loc = step.maneuver && step.maneuver.location;
-          const dist = loc ? haversineM(origin.lat, origin.lng, loc[1], loc[0]) : (step.distance || 0);
+          const loc = step.maneuver && step.maneuver.location, dist = loc ? haversineM(origin.lat, origin.lng, loc[1], loc[0]) : (step.distance || 0);
           const parsed = translateManeuver(step);
           el.navDist.textContent = dist >= 1000 ? `${(dist / 1000).toFixed(1)} km` : `${Math.max(10, Math.round(dist / 10) * 10)} m`;
-          el.navIcon.innerHTML = turnSvg(parsed.icon);
-          el.navText.textContent = parsed.text;
+          el.navIcon.innerHTML = turnSvg(parsed.icon); el.navText.textContent = parsed.text;
           const sKey = `${state.tripStage}-${state.navStepIdx}-${parsed.text}`;
-          if (dist <= 160 && state.lastSpokenKey !== sKey) {
-            state.lastSpokenKey = sKey;
-            speak(`${dist <= 35 ? 'Sekarang, ' : `Dalam ${Math.round(dist / 10) * 10} meter, `}${parsed.text}`);
-          }
+          if (dist <= 160 && state.lastSpokenKey !== sKey) { state.lastSpokenKey = sKey; speak(`${dist <= 35 ? 'Sekarang, ' : `Dalam ${Math.round(dist / 10) * 10} meter, `}${parsed.text}`); }
         }
       }
 
@@ -516,6 +633,7 @@
         el.dots.forEach(d => d.className = 'text-slate-400');
 
         if (newStage === 'idle') {
+          state.gpsOverridePickup = false; state.gpsOverrideDropoff = false;
           el.dots[0].className = 'text-emerald-700 font-extrabold'; el.pIdle.classList.remove('hidden'); el.navHud.classList.add('hidden');
           if (state.navRouteLine) { map.removeLayer(state.navRouteLine); state.navRouteLine = null; }
           if (state.tripRouteLine) state.tripRouteLine.setStyle({ opacity: 0.85, dashArray: null });
@@ -544,42 +662,32 @@
           manageWakeLock(false); speak(`Sampai di tujuan. Tagihan ${Math.round(state.lastCalc.totalFare)} rupiah.`);
         }
 
+        updateGeofenceButtons();
         if (sb && state.activeOrderId && newStage !== 'idle') {
           await sb.from('orders').update({ status: newStage }).eq('id', state.activeOrderId);
         }
       }
 
-      // === KALKULASI TARIF ===
       function calculateFare() {
-        const dKm = Math.max(0, parseFloat(el.distIn.value) || 0);
-        const toll = Math.max(0, parseFloat(el.tollIn.value) || 0);
-        const isMtn = el.mtnToggle.checked;
+        const dKm = Math.max(0, parseFloat(el.distIn.value) || 0), toll = Math.max(0, parseFloat(el.tollIn.value) || 0), isMtn = el.mtnToggle.checked;
         const svc = document.querySelector('input[name="service-type"]:checked');
-        const rate = parseFloat(svc.value), vehicle = svc.dataset.vehicle, label = svc.dataset.label;
-        const minFare = vehicle === 'Motor' ? tariffs.motor_min : tariffs.car_min;
+        const rate = parseFloat(svc.value), vehicle = svc.dataset.vehicle, label = svc.dataset.label, minFare = vehicle === 'Motor' ? tariffs.motor_min : tariffs.car_min;
         const surgeMult = parseFloat(document.querySelector('input[name="surge-multiplier"]:checked').value);
-
-        const baseFare = dKm > 0 ? Math.max(minFare, dKm * rate) : 0;
-        const surgeFee = baseFare * (surgeMult - 1);
-        const mtnFee = isMtn && baseFare > 0 ? Math.round(baseFare * (tariffs.mountain_pct / 100)) : 0;
-        const plat = C.calcPlatformFee(dKm, baseFare, vehicle);
-        const total = baseFare + surgeFee + mtnFee + plat.fee + toll;
-        const net = Math.max(0, total - plat.fee);
+        const baseFare = dKm > 0 ? Math.max(minFare, dKm * rate) : 0, surgeFee = baseFare * (surgeMult - 1), mtnFee = isMtn && baseFare > 0 ? Math.round(baseFare * (tariffs.mountain_pct / 100)) : 0;
+        const plat = C.calcPlatformFee(dKm, baseFare, vehicle), total = baseFare + surgeFee + mtnFee + plat.fee + toll, net = Math.max(0, total - plat.fee);
         const durText = (!state.isManualDistance && state.routeDurationSec) ? C.formatDuration(state.routeDurationSec) : (dKm > 0 ? `~${C.formatDuration((dKm / 30) * 3600)}` : '-');
 
         state.lastCalc = { serviceLabel: label, platformFee: plat.fee, netDriver: net, totalFare: total, distanceKm: dKm, durationText: durText };
-
-        el.sumSvc.textContent = label; el.sumDist.textContent = `${dKm.toFixed(2)} km`; el.sumDur.textContent = durText;
-        el.sumBase.textContent = C.formatIDR(baseFare);
+        el.sumSvc.textContent = label; el.sumDist.textContent = `${dKm.toFixed(2)} km`; el.sumDur.textContent = durText; el.sumBase.textContent = C.formatIDR(baseFare);
         el.rowSurge.classList.toggle('hidden', surgeMult <= 1 || baseFare <= 0); el.sumSurgeFee.textContent = `+${C.formatIDR(surgeFee)}`;
         el.rowMtn.classList.toggle('hidden', !isMtn || baseFare <= 0); el.sumMtnFee.textContent = `+${C.formatIDR(mtnFee)}`;
         el.sumPlatPct.textContent = plat.pctLabel; el.sumPlatFee.textContent = C.formatIDR(plat.fee);
         el.rowToll.classList.toggle('hidden', toll <= 0); el.sumTollFee.textContent = C.formatIDR(toll);
         el.sumNet.textContent = C.formatIDR(net); el.sumTotal.textContent = C.formatIDR(total);
         if (state.tripStage === 'arrived') el.arrBadge.textContent = C.formatIDR(total);
+        updateGeofenceButtons();
       }
 
-      // === SET TITIK & PENCARIAN ===
       function setMapMode(m) { state.activeMapMode = m; const p = m === 'pickup'; el.modeP.className = `py-1.5 px-3 rounded-lg text-xs font-semibold ${p ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-600'}`; el.modeD.className = `py-1.5 px-3 rounded-lg text-xs font-semibold ${!p ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-600'}`; }
       function setPoint(type, lat, lng, lbl = null, rev = false) {
         const isP = type === 'pickup', pt = { lat: Number(lat), lng: Number(lng), label: lbl || `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` };
@@ -590,7 +698,7 @@
         else { const m = L.marker([pt.lat, pt.lng], { icon: pinIcon(type), draggable: true }).addTo(map); m.on('dragend', e => setPoint(type, e.target.getLatLng().lat, e.target.getLatLng().lng, null, true)); if (isP) state.pickupMarker = m; else state.dropoffMarker = m; }
         if (rev) fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pt.lat}&lon=${pt.lng}&zoom=18`, { headers: { 'Accept-Language': 'id' } }).then(r => r.json()).then(d => { if (d && d.display_name) { const s = d.display_name.split(',').slice(0, 3).join(', '); if (isP && state.pickup) { state.pickup.label = s; el.pickupIn.value = s; } else if (!isP && state.dropoff) { state.dropoff.label = s; el.dropoffIn.value = s; } } }).catch(() => {});
         if (isP && !state.dropoff) setMapMode('dropoff');
-        if (state.pickup && state.dropoff) updateTripPreview(); else map.panTo([pt.lat, pt.lng]);
+        if (state.pickup && state.dropoff) updateTripPreview(); else { map.panTo([pt.lat, pt.lng]); updateGeofenceButtons(); }
       }
 
       function clearPoint(type) {
@@ -603,15 +711,12 @@
 
       function showPaxContacts(name, phone, metaText) {
         state.paxPhone = C.normalizePhoneWa(phone);
-        el.inTitle.textContent = `Penumpang: ${name}`;
-        el.inMeta.textContent = metaText;
+        el.inTitle.textContent = `Penumpang: ${name}`; el.inMeta.textContent = metaText;
         if (state.paxPhone.length >= 9) {
           el.btnWaPax.href = `https://wa.me/${state.paxPhone}?text=${encodeURIComponent(`Halo Kak ${name}, saya driver Ayo Jalan sudah menuju/tiba di lokasi jemput.`)}`;
           el.btnCallPax.href = `tel:+${state.paxPhone}`;
           el.btnWaPax.classList.remove('hidden'); el.btnCallPax.classList.remove('hidden');
-        } else {
-          el.btnWaPax.classList.add('hidden'); el.btnCallPax.classList.add('hidden');
-        }
+        } else { el.btnWaPax.classList.add('hidden'); el.btnCallPax.classList.add('hidden'); }
         el.inBanner.classList.remove('hidden');
       }
 
@@ -629,7 +734,6 @@
         setPoint('pickup', plat, plng, pname, false); setPoint('dropoff', dlat, dlng, dname, false); calculateFare();
       }
 
-      // === REAL-TIME ORDER RADAR (SUPABASE) ===
       async function loadPendingOrders() {
         if (!sb) return;
         const { data } = await sb.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
@@ -637,27 +741,27 @@
       }
 
       function renderPendingOrders(list) {
-        el.radarBox.classList.toggle('hidden', !list.length);
-        el.radarList.innerHTML = '';
+        el.radarBox.classList.toggle('hidden', !list.length); el.radarList.innerHTML = '';
         list.forEach(o => {
           const card = document.createElement('div');
           card.className = 'bg-white rounded-xl p-3 border border-blue-200 flex flex-wrap items-center justify-between gap-2 text-xs';
           card.innerHTML = `<div><p class="font-bold text-slate-900">${C.escapeHtml(o.passenger_name)} • ${C.escapeHtml(o.service_label)} (${o.distance_km} km)</p><p class="text-[11px] text-slate-600">${C.escapeHtml(o.pickup_name)} → ${C.escapeHtml(o.dropoff_name)}</p><p class="text-[11px] font-bold text-emerald-700">Tagihan: ${C.formatIDR(o.total_fare)} (${o.payment_method})</p></div>
-            <button type="button" class="btn-claim-order px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold">Ambil Order</button>`;
+            <button type="button" class="btn-claim-order px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold">Ambil Order</button>`;
           card.querySelector('.btn-claim-order').addEventListener('click', () => claimRealtimeOrder(o));
           el.radarList.appendChild(card);
         });
+        updateGeofenceButtons();
       }
 
       async function claimRealtimeOrder(o) {
-        const p = getProfile();
-        const drvName = p.driverName || 'Mitra Ayo Jalan';
+        if (!state.deviceGps) return alert('GPS HP Anda harus aktif sebelum mengambil order.');
+        const p = getProfile(), drvName = p.driverName || 'Mitra Ayo Jalan';
         const { data, error } = await sb.from('orders').update({
           status: 'to_pickup', driver_id: state.driverId, driver_name: drvName,
-          driver_lat: state.deviceGps ? state.deviceGps.lat : null, driver_lng: state.deviceGps ? state.deviceGps.lng : null
+          driver_lat: state.deviceGps.lat, driver_lng: state.deviceGps.lng
         }).eq('id', o.id).eq('status', 'pending').select().single();
 
-        if (error || !data) { alert('Maaf, order ini sudah diambil driver lain!'); loadPendingOrders(); return; }
+        if (error || !data) { alert('Order sudah diambil driver lain.'); loadPendingOrders(); return; }
         state.activeOrderId = data.id;
         const rSvc = document.querySelector(`input[name="service-type"][data-code="${data.service_code}"]`); if (rSvc) rSvc.checked = true;
         const rSrg = document.querySelector(`input[name="surge-multiplier"][value="${Number(data.surge_mult).toFixed(1)}"]`); if (rSrg) rSrg.checked = true;
@@ -665,8 +769,7 @@
         showPaxContacts(data.passenger_name, data.passenger_phone, `Bayar: ${data.payment_method}${data.note ? ` • Catatan: "${data.note}"` : ''}`);
         setPoint('pickup', data.pickup_lat, data.pickup_lng, data.pickup_name, false);
         setPoint('dropoff', data.dropoff_lat, data.dropoff_lng, data.dropoff_name, false);
-        setTripStage('to_pickup');
-        loadPendingOrders();
+        setTripStage('to_pickup'); loadPendingOrders();
       }
 
       function subscribeRealtimeOrders() {
@@ -678,7 +781,6 @@
         }).subscribe();
       }
 
-      // === LOGIN / PIN GATE ===
       if (sessionStorage.getItem(KEYS.UNLOCKED) === '1') { el.pinLock.classList.add('hidden'); if (sb) subscribeRealtimeOrders(); }
       async function tryUnlock() {
         const pin = el.pinInput.value.trim();
@@ -691,23 +793,16 @@
             renderProfile(); sessionStorage.setItem(KEYS.UNLOCKED, '1'); el.pinLock.classList.add('hidden');
             subscribeRealtimeOrders(); setTimeout(() => map.invalidateSize(), 200); return;
           }
-          // Izinkan fallback PIN admin/demo jika belum ada tabel driver terisi
           if (pin !== CFG.DRIVER_PIN) { el.pinErr.classList.remove('hidden'); return; }
         } else if (pin !== CFG.DRIVER_PIN) { el.pinErr.classList.remove('hidden'); return; }
-
         sessionStorage.setItem(KEYS.UNLOCKED, '1'); el.pinLock.classList.add('hidden');
         if (sb) subscribeRealtimeOrders();
         setTimeout(() => { map.invalidateSize(); if (state.tripRouteLine) map.fitBounds(state.tripRouteLine.getBounds(), { padding: [55, 55] }); }, 200);
       }
       el.btnUnlock.addEventListener('click', tryUnlock); el.pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
 
-      // === REKAP & DOMPET ===
       function getProfile() { try { return JSON.parse(localStorage.getItem(KEYS.PROFILE) || '{}'); } catch { return {}; } }
-      function renderProfile() {
-        const p = getProfile(), dName = p.driverName || 'Mitra Ayo Jalan';
-        el.dispDrv.textContent = dName;
-        el.dispAcc.textContent = (p.bank && p.accountNumber) ? `${p.bank} • ${p.accountNumber} (${p.accountHolder || dName})` : 'Belum diatur';
-      }
+      function renderProfile() { const p = getProfile(), d = p.driverName || 'Mitra Ayo Jalan'; el.dispDrv.textContent = d; el.dispAcc.textContent = (p.bank && p.accountNumber) ? `${p.bank} • ${p.accountNumber} (${p.accountHolder || d})` : 'Belum diatur'; }
       function loadTrips() { try { return JSON.parse(localStorage.getItem(KEYS.TRIPS) || '[]'); } catch { return []; } }
       function saveTrips(l) { localStorage.setItem(KEYS.TRIPS, JSON.stringify(l)); renderFinancials(); }
       function loadWithdraws() { try { return JSON.parse(localStorage.getItem(KEYS.WITHDRAWS) || '[]'); } catch { return []; } }
@@ -770,16 +865,19 @@
         el.qrisModal.classList.remove('hidden');
       }
 
-      // === EVENT BINDINGS ===
       function updateFollowUI() {
         el.btnFollow.className = state.followGps ? 'bg-blue-600 text-white shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold' : 'bg-white/95 text-blue-700 border border-blue-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold';
         el.btnFollow.textContent = state.followGps ? '🎯 Mengikuti GPS' : '🎯 Pusatkan GPS';
       }
 
-      el.btnStartNav.addEventListener('click', () => { if (!state.pickup || !state.dropoff) return alert('Pilih titik jemput & tujuan dahulu.'); setTripStage('to_pickup'); });
+      el.btnStartNav.addEventListener('click', () => {
+        if (!state.deviceGps) return alert('GPS perangkat belum aktif. Aktifkan lokasi terlebih dahulu.');
+        if (!state.pickup || !state.dropoff) return alert('Pilih titik jemput & tujuan dahulu.');
+        setTripStage('to_pickup');
+      });
       el.btnCancelNav.addEventListener('click', () => setTripStage('idle'));
-      el.btnConfirmPick.addEventListener('click', () => setTripStage('to_dropoff'));
-      el.btnConfirmArr.addEventListener('click', () => setTripStage('arrived'));
+      el.btnConfirmPick.addEventListener('click', () => { if (!el.btnConfirmPick.disabled) setTripStage('to_dropoff'); });
+      el.btnConfirmArr.addEventListener('click', () => { if (!el.btnConfirmArr.disabled) setTripStage('arrived'); });
       el.btnArrQris.addEventListener('click', openQris);
       el.btnArrCash.addEventListener('click', () => finishTrip('Tunai'));
       el.btnVoice.addEventListener('click', () => { state.voiceEnabled = !state.voiceEnabled; el.btnVoice.textContent = state.voiceEnabled ? '🔊 Suara: ON' : '🔇 Suara: OFF'; });
@@ -819,8 +917,9 @@
       document.querySelectorAll('input[name="service-type"], input[name="surge-multiplier"]').forEach(r => r.addEventListener('change', calculateFare));
       el.mtnToggle.addEventListener('change', calculateFare); el.tollIn.addEventListener('input', calculateFare);
 
-      el.btnQris.addEventListener('click', openQris); el.btnCloseQris.addEventListener('click', () => el.qrisModal.classList.add('hidden'));
-      el.btnSaveTrip.addEventListener('click', () => finishTrip('Tunai'));
+      el.btnQris.addEventListener('click', () => { if (!el.btnQris.disabled) openQris(); });
+      el.btnCloseQris.addEventListener('click', () => el.qrisModal.classList.add('hidden'));
+      el.btnSaveTrip.addEventListener('click', () => { if (!el.btnSaveTrip.disabled) finishTrip('Tunai'); });
       el.btnQrisDone.addEventListener('click', () => { el.qrisModal.classList.add('hidden'); finishTrip('QRIS'); });
 
       el.btnReceipt.addEventListener('click', () => {
@@ -860,7 +959,7 @@
 
       el.btnReset.addEventListener('click', () => { setTripStage('idle'); clearPoint('pickup'); clearPoint('dropoff'); el.inBanner.classList.add('hidden'); state.isManualDistance = false; el.distIn.value = 0; el.tollIn.value = 0; el.mtnToggle.checked = false; calculateFare(); });
 
-      // Live GPS Watch + Broadcast ke Supabase jika sedang antar order
+      // Live GPS Watch + Broadcast Real-Time + Cek Geofence Otomatis
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(pos => {
           const { latitude, longitude, accuracy } = pos.coords;
@@ -869,13 +968,24 @@
           if (!state.deviceGpsMarker) state.deviceGpsMarker = L.marker([latitude, longitude], { icon: L.divIcon({ className: 'custom-pin-wrapper', html: '<div class="driver-gps-marker" style="transform:translate(-50%,-50%)"></div>', iconSize: [0, 0] }), zIndexOffset: 600 }).addTo(map);
           else state.deviceGpsMarker.setLatLng([latitude, longitude]);
 
+          updateGeofenceButtons();
+
           if (state.tripStage === 'to_pickup' || state.tripStage === 'to_dropoff') {
             if (state.followGps) map.panTo([latitude, longitude], { animate: true });
             updateActiveNav(false);
-            if (sb && state.activeOrderId) sb.from('orders').update({ driver_lat: latitude, driver_lng: longitude }).eq('id', state.activeOrderId);
+            if (sb && state.activeOrderId) {
+              sb.from('orders').update({ driver_lat: latitude, driver_lng: longitude }).eq('id', state.activeOrderId).then(() => {});
+            }
           }
-          if (sb && state.driverId) sb.from('drivers').update({ last_lat: latitude, last_lng: longitude, is_online: true }).eq('id', state.driverId);
-        }, () => { el.gpsText.textContent = 'GPS Nonaktif'; }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 4000 });
+          if (sb && state.driverId) {
+            sb.from('drivers').update({ last_lat: latitude, last_lng: longitude, is_online: true }).eq('id', state.driverId).then(() => {});
+          }
+        }, () => {
+          el.gpsText.textContent = 'GPS Nonaktif';
+          updateGeofenceButtons();
+        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 4000 });
+      } else {
+        el.gpsText.textContent = 'GPS Tidak Didukung';
       }
 
       el.dispDate.textContent = getTodayFormatted();
