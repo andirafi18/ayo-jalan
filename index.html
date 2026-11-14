@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ayo Jalan - Kalkulator Tarif Taksi Online Bondowoso</title>
+
+  <!-- PWA Manifest & Theme -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#059669" />
+
+  <!-- Dukungan Instalasi di iPhone / iOS (Safari) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Ayo Jalan" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <!-- Leaflet Routing Machine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+
+  <style>
+    /* Sembunyikan panel instruksi bawaan Leaflet Routing Machine agar UI tetap bersih */
+    .leaflet-routing-container {
+      display: none !important;
+    }
+
+    /* Custom Marker Pin */
+    .custom-pin-wrapper {
+      background: transparent;
+      border: none;
+    }
+
+    /* Animasi Denyut Pin GPS Perangkat */
+    @keyframes gps-pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.65);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 14px rgba(37, 99, 235, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+      }
+    }
+
+    .device-gps-dot {
+      width: 18px;
+      height: 18px;
+      background: #2563eb;
+      border: 3px solid #ffffff;
+      border-radius: 9999px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      animation: gps-pulse 2s infinite;
+    }
+
+    /* Scrollbar rapi untuk dropdown autocomplete */
+    .autocomplete-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .autocomplete-list::-webkit-scrollbar-thumb {
+      background-color: #a7f3d0;
+      border-radius: 9999px;
+    }
+
+    /* Pastikan peta punya z-index di bawah dropdown autocomplete */
+    .leaflet-container {
+      font-family: inherit;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-emerald-100 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm shadow-emerald-200 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 17h.01M16 17h.01M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11M5 11v6a1 1 0 001 1h1a1 1 0 001-1v-1h8v1a1 1 0 001 1h1a1 1 0 001-1v-6M5 11h14" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Ayo Jalan</h1>
+          <p class="text-xs text-emerald-700 font-medium">Kalkulator Tarif Taksi Online • Bondowoso, Jawa Timur</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="gps-header-status" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+          <span id="gps-header-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span id="gps-header-text">Mendeteksi GPS...</span>
+        </span>
+        <button id="btn-reset-all" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- KOLOM KIRI: Form Pencarian, Pengaturan Tarif & Ringkasan Biaya -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- Card 1: Penentuan Titik Rute -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
+              1. Rute Perjalanan
+            </h2>
+            <button id="btn-swap-points" type="button" title="Tukar Titik Jemput & Tujuan" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              Tukar
+            </button>
+          </div>
+
+          <!-- Mode Klik Peta -->
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl mb-4">
+            <button id="mode-pickup" type="button" class="py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-white text-emerald-700 shadow-sm">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              Klik Peta: Jemput
+            </button>
+            <button id="mode-dropoff" type="button" class="py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              Klik Peta: Tujuan
+            </button>
+          </div>
+
+          <div class="space-y-3.5">
+            <!-- Input Titik Penjemputan -->
+            <div class="relative">
+              <label for="pickup-input" class="block text-xs font-semibold text-slate-600 mb-1">Titik Penjemputan</label>
+              <div class="relative flex items-center">
+                <span class="absolute left-3 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100 pointer-events-none"></span>
+                <input
+                  id="pickup-input"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Cari alamat di Bondowoso / Jatim atau klik peta..."
+                  class="w-full pl-9 pr-16 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+                <div class="absolute right-2 flex items-center gap-1">
+                  <button id="btn-gps-pickup" type="button" title="Jadikan Lokasi GPS Saya sebagai Titik Jemput" class="p-1.5 text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2" />
+                    </svg>
+                  </button>
+                  <button id="btn-clear-pickup" type="button" title="Hapus Titik Jemput" class="hidden p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <!-- Dropdown Autocomplete Jemput -->
+              <ul id="pickup-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
+            </div>
+
+            <!-- Input Titik Tujuan -->
+            <div class="relative">
+              <label for="dropoff-input" class="block text-xs font-semibold text-slate-600 mb-1">Titik Tujuan</label>
+              <div class="relative flex items-center">
+                <span class="absolute left-3 w-3 h-3 rounded-full bg-rose-500 ring-4 ring-rose-100 pointer-events-none"></span>
+                <input
+                  id="dropoff-input"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Cari tujuan di Bondowoso / Jatim atau klik peta..."
+                  class="w-full pl-9 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+                <button id="btn-clear-dropoff" type="button" title="Hapus Titik Tujuan" class="hidden absolute right-2 p-1 text-slate-400 hover:text-rose-500 rounded-lg transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <!-- Dropdown Autocomplete Tujuan -->
+              <ul id="dropoff-results" class="autocomplete-list hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto z-50 divide-y divide-slate-100 text-sm"></ul>
+            </div>
+          </div>
+
+          <!-- Contoh Rute Populer Bondowoso -->
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <p class="text-[11px] font-semibold text-slate-500 mb-2">Contoh Rute Populer (Bondowoso):</p>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" class="preset-route text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium border border-emerald-200/70 transition"
+                data-p-lat="-7.9135" data-p-lng="113.8215" data-p-name="Alun-Alun RBA Ki Ronggo Bondowoso"
+                data-d-lat="-7.9158" data-d-lng="113.8317" data-d-name="Terminal Bondowoso">
+                Alun-Alun → Terminal
+              </button>
+              <button type="button" class="preset-route text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium border border-emerald-200/70 transition"
+                data-p-lat="-7.9277" data-p-lng="113.8143" data-p-name="Citiplaza Bondowoso"
+                data-d-lat="-7.9189" data-d-lng="113.8146" data-d-name="RSUD dr. H. Koesnadi Bondowoso">
+                Citiplaza → RS Koesnadi
+              </button>
+              <button type="button" class="preset-route text-xs px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium border border-emerald-200/70 transition"
+                data-p-lat="-7.9135" data-p-lng="113.8215" data-p-name="Alun-Alun Bondowoso"
+                data-d-lat="-8.0646" data-d-lng="114.1614" data-d-name="Kawah Wurung, Ijen, Bondowoso">
+                Alun-Alun → Kawah Wurung
+              </button>
+            </div>
+          </div>
+
+          <!-- Kotak Peringatan / Validasi Rute -->
+          <div id="route-alert" class="hidden mt-3.5 p-3 rounded-xl text-xs font-medium flex items-start gap-2.5 border">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span id="route-alert-text"></span>
+          </div>
+        </section>
+
+        <!-- Card 2: Pengaturan Tarif (Khusus Jawa Timur) -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
+            2. Pengaturan Tarif (Jawa Timur)
+          </h2>
+
+          <!-- Jarak Tempuh -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="distance-input" class="text-xs font-semibold text-slate-600">Jarak Tempuh (km)</label>
+              <div class="flex items-center gap-2">
+                <span id="distance-source-badge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Menunggu rute</span>
+                <button id="btn-sync-distance" type="button" class="hidden text-[11px] font-semibold text-emerald-700 hover:underline">Sinkronkan Peta</button>
+              </div>
+            </div>
+            <div class="relative">
+              <input
+                id="distance-input"
+                type="number"
+                min="0"
+                step="0.1"
+                value="0"
+                class="w-full pl-3.5 pr-12 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+              />
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">KM</span>
+            </div>
+          </div>
+
+          <!-- Jenis Layanan -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">Jenis Layanan</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <!-- Hemat -->
+              <label class="cursor-pointer">
+                <input type="radio" name="service-type" value="3800" data-label="Hemat" class="peer sr-only" />
+                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800">Hemat</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Bawah</span>
+                  </div>
+                  <p class="text-xs font-bold text-emerald-700">Rp3.800<span class="font-normal text-slate-500">/km</span></p>
+                </div>
+              </label>
+
+              <!-- Reguler -->
+              <label class="cursor-pointer">
+                <input type="radio" name="service-type" value="6000" data-label="Reguler / Standard" class="peer sr-only" checked />
+                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800">Reguler</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">Standar</span>
+                  </div>
+                  <p class="text-xs font-bold text-emerald-700">Rp6.000<span class="font-normal text-slate-500">/km</span></p>
+                </div>
+              </label>
+
+              <!-- XL / Prioritas -->
+              <label class="cursor-pointer">
+                <input type="radio" name="service-type" value="7500" data-label="XL / Prioritas" class="peer sr-only" />
+                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800">XL / Prioritas</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">Atas</span>
+                  </div>
+                  <p class="text-xs font-bold text-emerald-700">Rp7.500<span class="font-normal text-slate-500">/km</span></p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Kondisi Waktu / Lonjakan (Surge) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-2">Kondisi Waktu & Permintaan (Surge Pricing)</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="surge-multiplier" value="1.0" data-label="Normal (1.0x)" class="peer sr-only" checked />
+                <div class="p-2.5 text-center rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:ring-1 peer-checked:ring-emerald-500 transition h-full flex flex-col justify-center">
+                  <span class="text-xs font-bold text-slate-800">Normal</span>
+                  <span class="text-[11px] font-semibold text-emerald-700">1.0x</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="surge-multiplier" value="1.2" data-label="Jam Sibuk / Hujan Ringan (1.2x)" class="peer sr-only" />
+                <div class="p-2.5 text-center rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-amber-50 peer-checked:border-amber-500 peer-checked:ring-1 peer-checked:ring-amber-500 transition h-full flex flex-col justify-center">
+                  <span class="text-xs font-bold text-slate-800 leading-tight">Jam Sibuk / Hujan</span>
+                  <span class="text-[11px] font-semibold text-amber-700">1.2x</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="surge-multiplier" value="1.5" data-label="Permintaan Tinggi (1.5x)" class="peer sr-only" />
+                <div class="p-2.5 text-center rounded-xl border border-slate-200 bg-slate-50/70 peer-checked:bg-rose-50 peer-checked:border-rose-500 peer-checked:ring-1 peer-checked:ring-rose-500 transition h-full flex flex-col justify-center">
+                  <span class="text-xs font-bold text-slate-800 leading-tight">Permintaan Tinggi</span>
+                  <span class="text-[11px] font-semibold text-rose-700">1.5x</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Estimasi Tol & Parkir -->
+          <div>
+            <label for="toll-input" class="block text-xs font-semibold text-slate-600 mb-1">Estimasi Biaya Tol & Parkir (Opsional)</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
+              <input
+                id="toll-input"
+                type="number"
+                min="0"
+                step="1000"
+                value="0"
+                placeholder="0"
+                class="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 3: Kartu Ringkasan & Rincian Biaya -->
+        <section class="bg-white rounded-2xl border-2 border-emerald-500/30 shadow-md overflow-hidden">
+          <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-3.5 text-white flex items-center justify-between">
+            <h2 class="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+              </svg>
+              Rincian Estimasi Biaya
+            </h2>
+            <span id="summary-service-badge" class="text-[11px] font-semibold bg-white/20 px-2.5 py-0.5 rounded-full">Reguler</span>
+          </div>
+
+          <div class="p-5 space-y-3 text-sm">
+            <!-- Jarak & Waktu -->
+            <div class="flex items-center justify-between pb-3 border-b border-dashed border-slate-200">
+              <div>
+                <p class="text-xs text-slate-500">Jarak & Estimasi Waktu</p>
+                <p class="font-semibold text-slate-800">
+                  <span id="sum-distance">0 km</span>
+                  <span class="text-slate-400 mx-1">•</span>
+                  <span id="sum-duration" class="text-emerald-700">-</span>
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-slate-500">Tarif Layanan</p>
+                <p id="sum-rate" class="font-semibold text-slate-700">Rp6.000/km</p>
+              </div>
+            </div>
+
+            <!-- Tarif Dasar Jarak -->
+            <div class="flex items-center justify-between text-slate-700">
+              <span>Tarif Dasar Jarak</span>
+              <span id="sum-base-fare" class="font-semibold">Rp0</span>
+            </div>
+
+            <!-- Biaya Lonjakan (Muncul jika selain Normal) -->
+            <div id="row-surge" class="hidden flex items-center justify-between text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg">
+              <span class="flex items-center gap-1.5 text-xs font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Biaya Lonjakan (<span id="sum-surge-label">1.2x</span>)
+              </span>
+              <span id="sum-surge-fee" class="font-semibold text-sm">+Rp0</span>
+            </div>
+
+            <!-- Biaya Jasa Aplikasi -->
+            <div class="flex items-center justify-between text-slate-700">
+              <div>
+                <span>Biaya Jasa Aplikasi & Platform</span>
+                <p class="text-[11px] text-slate-400">Min. Rp10.000 atau 5% tarif jarak</p>
+              </div>
+              <span id="sum-platform-fee" class="font-semibold">Rp0</span>
+            </div>
+
+            <!-- Biaya Tol & Parkir (Muncul jika > 0) -->
+            <div id="row-toll" class="hidden flex items-center justify-between text-slate-700">
+              <span>Biaya Tol & Parkir</span>
+              <span id="sum-toll-fee" class="font-semibold">Rp0</span>
+            </div>
+
+            <!-- Total Estimasi Akhir -->
+            <div class="pt-3 border-t-2 border-emerald-100 flex items-end justify-between">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Estimasi Akhir</p>
+                <p class="text-[11px] text-slate-400">Belum termasuk tips pengemudi</p>
+              </div>
+              <p id="sum-total" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">Rp0</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- KOLOM KANAN: Peta Interaktif Leaflet + OSRM -->
+      <div class="lg:col-span-7 lg:sticky lg:top-20">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-2 relative">
+          <!-- Container Peta -->
+          <div id="map" class="w-full h-[400px] sm:h-[480px] lg:h-[calc(100vh-8.5rem)] min-h-[400px] rounded-xl overflow-hidden bg-emerald-50"></div>
+
+          <!-- Overlay Status Klik Peta (Kiri Bawah) -->
+          <div class="absolute bottom-5 left-5 right-5 sm:right-auto z-20 pointer-events-none flex flex-wrap items-center gap-2">
+            <div id="map-hint-pill" class="pointer-events-auto bg-white/95 backdrop-blur-sm border border-emerald-200 shadow-md px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 flex items-center gap-2">
+              <span id="map-hint-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+              <span id="map-hint-text">Klik peta untuk menentukan <strong>Titik Penjemputan</strong></span>
+            </div>
+
+            <div id="map-route-badge" class="hidden pointer-events-auto bg-emerald-700/95 backdrop-blur-sm text-white shadow-md px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <span id="map-route-badge-text">0 km • 0 menit</span>
+            </div>
+          </div>
+
+          <!-- Overlay Loading Rute -->
+          <div id="map-loading" class="hidden absolute inset-2 rounded-xl bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center">
+            <div class="bg-white px-4 py-2.5 rounded-xl shadow-lg border border-emerald-100 flex items-center gap-2.5 text-xs font-semibold text-emerald-800">
+              <svg class="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Menghitung rute jalan raya...
+            </div>
+          </div>
+
+          <!-- Tombol Kontrol Peta Kanan Atas (GPS Saya & Fokus Bondowoso) -->
+          <div class="absolute top-5 right-5 z-20 flex items-center gap-2">
+            <button id="btn-gps-center" type="button" title="Sesuaikan peta dengan titik GPS perangkat" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2" />
+              </svg>
+              GPS Saya
+            </button>
+            <button id="btn-center-bondowoso" type="button" title="Fokus ke Kota Bondowoso" class="bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 shadow-md px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Fokus Bondowoso
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200/80 py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <p><strong>Ayo Jalan</strong> • Bondowoso, Jawa Timur. Peta oleh OpenStreetMap, Nominatim & OSRM.</p>
+      <p>Estimasi tarif mengacu pada skema batas tarif angkutan sewa khusus Provinsi Jawa Timur.</p>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS & Leaflet Routing Machine -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+
+  <script>
+    (() => {
+      // =========================================================================
+      // KONSTANTA & STATE APLIKASI (FOKUS BONDOWOSO, JAWA TIMUR)
+      // =========================================================================
+      const BONDOWOSO_CENTER = [-7.9135, 113.8215]; // Alun-Alun / Pusat Kota Bondowoso
+      const BONDOWOSO_ZOOM = 13;
+      const GPS_ZOOM = 15;
+
+      // Bounding box operasional Provinsi Jawa Timur
+      const JATIM_BBOX = {
+        minLng: 110.85,
+        minLat: -8.85,
+        maxLng: 115.95,
+        maxLat: -5.75
+      };
+
+      const state = {
+        pickup: null,   // { lat, lng, label }
+        dropoff: null,  // { lat, lng, label }
+        activeMapMode: 'pickup', // 'pickup' | 'dropoff'
+        routeDistanceKm: null,
+        routeDurationSec: null,
+        isManualDistance: false,
+        pickupMarker: null,
+        dropoffMarker: null,
+        routingControl: null,
+        deviceGps: null,          // { lat, lng, accuracy }
+        deviceGpsMarker: null,
+        deviceGpsCircle: null,
+        hasAutoCenteredGps: false,
+        gpsWatchId: null,
+        searchAbortControllers: { pickup: null, dropoff: null }
+      };
+
+      // =========================================================================
+      // REFERENSI ELEMEN DOM
+      // =========================================================================
+      const el = {
+        gpsHeaderStatus: document.getElementById('gps-header-status'),
+        gpsHeaderDot: document.getElementById('gps-header-dot'),
+        gpsHeaderText: document.getElementById('gps-header-text'),
+        pickupInput: document.getElementById('pickup-input'),
+        dropoffInput: document.getElementById('dropoff-input'),
+        pickupResults: document.getElementById('pickup-results'),
+        dropoffResults: document.getElementById('dropoff-results'),
+        btnClearPickup: document.getElementById('btn-clear-pickup'),
+        btnClearDropoff: document.getElementById('btn-clear-dropoff'),
+        btnGpsPickup: document.getElementById('btn-gps-pickup'),
+        btnGpsCenter: document.getElementById('btn-gps-center'),
+        btnSwapPoints: document.getElementById('btn-swap-points'),
+        btnResetAll: document.getElementById('btn-reset-all'),
+        btnCenterBondowoso: document.getElementById('btn-center-bondowoso'),
+        modePickupBtn: document.getElementById('mode-pickup'),
+        modeDropoffBtn: document.getElementById('mode-dropoff'),
+        routeAlert: document.getElementById('route-alert'),
+        routeAlertText: document.getElementById('route-alert-text'),
+        distanceInput: document.getElementById('distance-input'),
+        distanceSourceBadge: document.getElementById('distance-source-badge'),
+        btnSyncDistance: document.getElementById('btn-sync-distance'),
+        tollInput: document.getElementById('toll-input'),
+        summaryServiceBadge: document.getElementById('summary-service-badge'),
+        sumDistance: document.getElementById('sum-distance'),
+        sumDuration: document.getElementById('sum-duration'),
+        sumRate: document.getElementById('sum-rate'),
+        sumBaseFare: document.getElementById('sum-base-fare'),
+        rowSurge: document.getElementById('row-surge'),
+        sumSurgeLabel: document.getElementById('sum-surge-label'),
+        sumSurgeFee: document.getElementById('sum-surge-fee'),
+        sumPlatformFee: document.getElementById('sum-platform-fee'),
+        rowToll: document.getElementById('row-toll'),
+        sumTollFee: document.getElementById('sum-toll-fee'),
+        sumTotal: document.getElementById('sum-total'),
+        mapHintDot: document.getElementById('map-hint-dot'),
+        mapHintText: document.getElementById('map-hint-text'),
+        mapRouteBadge: document.getElementById('map-route-badge'),
+        mapRouteBadgeText: document.getElementById('map-route-badge-text'),
+        mapLoading: document.getElementById('map-loading')
+      };
+
+      // =========================================================================
+      // INISIALISASI PETA LEAFLET & OSRM ROUTING
+      // =========================================================================
+      const map = L.map('map', {
+        center: BONDOWOSO_CENTER,
+        zoom: BONDOWOSO_ZOOM,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      function createPinIcon(type) {
+        const isPickup = type === 'pickup';
+        const bgColor = isPickup ? '#059669' : '#e11d48';
+        const label = isPickup ? 'JEMPUT' : 'TUJUAN';
+        return L.divIcon({
+          className: 'custom-pin-wrapper',
+          html: `
+            <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);">
+              <span style="background:${bgColor};color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.25);white-space:nowrap;margin-bottom:2px;">
+                ${label}
+              </span>
+              <svg width="28" height="34" viewBox="0 0 24 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3));">
+                <path d="M12 0C5.373 0 0 5.373 0 12C0 20.25 12 30 12 30C12 30 24 20.25 24 12C24 5.373 18.627 0 12 0Z" fill="${bgColor}"/>
+                <circle cx="12" cy="11.5" r="4.5" fill="white"/>
+              </svg>
+            </div>
+          `,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        });
+      }
+
+      const deviceGpsIcon = L.divIcon({
+        className: 'custom-pin-wrapper',
+        html: `<div class="device-gps-dot" style="transform:translate(-50%,-50%);"></div>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+
+      state.routingControl = L.Routing.control({
+        waypoints: [],
+        router: L.Routing.osrmv1({
+          serviceUrl: 'https://router.project-osrm.org/route/v1',
+          profile: 'driving'
+        }),
+        lineOptions: {
+          styles: [
+            { color: '#047857', opacity: 0.9, weight: 6 },
+            { color: '#34d399', opacity: 0.95, weight: 3 }
+          ],
+          addWaypoints: false
+        },
+        show: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        createMarker: () => null
+      }).addTo(map);
+
+      state.routingControl.on('routesfound', (e) => {
+        el.mapLoading.classList.add('hidden');
+        const route = e.routes[0];
+        if (!route || !route.summary) {
+          showAlert('Rute tidak dapat dihitung. Coba pilih lokasi lain di dekat jalan raya.', 'error');
+          return;
+        }
+
+        const waypoints = e.waypoints || [];
+        const offRoad = waypoints.some(wp => wp.distance && wp.distance > 2500);
+
+        const distKm = route.summary.totalDistance / 1000;
+        const durationSec = route.summary.totalTime;
+
+        state.routeDistanceKm = distKm;
+        state.routeDurationSec = durationSec;
+        state.isManualDistance = false;
+
+        el.distanceInput.value = distKm.toFixed(2);
+        updateDistanceBadge();
+
+        el.mapRouteBadge.classList.remove('hidden');
+        el.mapRouteBadgeText.textContent = `${distKm.toFixed(2)} km • ${formatDuration(durationSec)}`;
+
+        if (offRoad) {
+          showAlert('Salah satu titik berjarak > 2,5 km dari jalan raya terdekat. Rute disesuaikan ke akses jalan terdekat.', 'warning');
+        } else if (!isWithinJatimBounds(state.pickup.lat, state.pickup.lng) || !isWithinJatimBounds(state.dropoff.lat, state.dropoff.lng)) {
+          showAlert('Peringatan: Salah satu titik berada di luar batas geografis Provinsi Jawa Timur.', 'warning');
+        } else {
+          hideAlert();
+        }
+
+        calculateFare();
+      });
+
+      state.routingControl.on('routingerror', () => {
+        el.mapLoading.classList.add('hidden');
+        state.routeDistanceKm = null;
+        state.routeDurationSec = null;
+        el.mapRouteBadge.classList.add('hidden');
+        showAlert('Rute jalan raya tidak ditemukan atau lokasi berada di luar jangkauan jalan raya. Silakan geser pin ke jalan terdekat.', 'error');
+        updateDistanceBadge();
+        calculateFare();
+      });
+
+      // =========================================================================
+      // SINKRONISASI GPS PERANGKAT KE PETA
+      // =========================================================================
+      function updateGpsHeaderBadge(status, text) {
+        el.gpsHeaderStatus.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border';
+        if (status === 'active') {
+          el.gpsHeaderStatus.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+        } else if (status === 'warning') {
+          el.gpsHeaderStatus.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        } else if (status === 'error') {
+          el.gpsHeaderStatus.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        } else {
+          el.gpsHeaderStatus.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+          el.gpsHeaderDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-ping';
+        }
+        el.gpsHeaderText.textContent = text;
+      }
+
+      function renderDeviceGpsOnMap(lat, lng, accuracy, shouldCenterMap = false) {
+        state.deviceGps = { lat, lng, accuracy };
+
+        const clampedRadius = Math.min(Math.max(accuracy || 20, 15), 1000);
+        if (state.deviceGpsCircle) {
+          state.deviceGpsCircle.setLatLng([lat, lng]).setRadius(clampedRadius);
+        } else {
+          state.deviceGpsCircle = L.circle([lat, lng], {
+            radius: clampedRadius,
+            color: '#3b82f6',
+            fillColor: '#60a5fa',
+            fillOpacity: 0.15,
+            weight: 1.5
+          }).addTo(map);
+        }
+
+        const popupHtml = `
+          <div style="font-family:inherit;min-width:170px;">
+            <p style="font-weight:700;font-size:12px;color:#1e3a8a;margin:0 0 2px;">Lokasi GPS Perangkat</p>
+            <p style="font-size:11px;color:#475569;margin:0 0 8px;">Akurasi: ±${Math.round(accuracy || 0)} meter</p>
+            <button id="popup-use-gps-pickup" type="button" style="width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;">
+              Jadikan Titik Jemput
+            </button>
+          </div>
+        `;
+
+        if (state.deviceGpsMarker) {
+          state.deviceGpsMarker.setLatLng([lat, lng]).setPopupContent(popupHtml);
+        } else {
+          state.deviceGpsMarker = L.marker([lat, lng], {
+            icon: deviceGpsIcon,
+            zIndexOffset: 500
+          }).addTo(map).bindPopup(popupHtml);
+
+          state.deviceGpsMarker.on('popupopen', () => {
+            const btn = document.getElementById('popup-use-gps-pickup');
+            if (btn) {
+              btn.addEventListener('click', () => {
+                if (state.deviceGps) {
+                  setPoint('pickup', state.deviceGps.lat, state.deviceGps.lng, null, true);
+                  state.deviceGpsMarker.closePopup();
+                }
+              });
+            }
+          });
+        }
+
+        const insideJatim = isWithinJatimBounds(lat, lng);
+        if (insideJatim) {
+          updateGpsHeaderBadge('active', `GPS Aktif (±${Math.round(accuracy || 0)}m)`);
+        } else {
+          updateGpsHeaderBadge('warning', 'GPS di Luar Jatim');
+        }
+
+        if (shouldCenterMap) {
+          map.flyTo([lat, lng], GPS_ZOOM, { duration: 1.0 });
+          if (!insideJatim) {
+            showAlert('GPS perangkat terdeteksi di luar wilayah operasional Jawa Timur. Klik "Fokus Bondowoso" untuk kembali ke Bondowoso.', 'warning');
+          }
+        }
+      }
+
+      function handleGpsError(err) {
+        let msg = 'GPS perangkat tidak tersedia.';
+        if (err && err.code === 1) {
+          msg = 'Izin GPS ditolak. Peta tetap berfokus di Bondowoso.';
+        } else if (err && err.code === 2) {
+          msg = 'Sinyal GPS perangkat tidak ditemukan.';
+        } else if (err && err.code === 3) {
+          msg = 'Waktu deteksi GPS habis (timeout).';
+        }
+        updateGpsHeaderBadge('error', 'GPS Nonaktif');
+        return msg;
+      }
+
+      function initDeviceGps() {
+        if (!navigator.geolocation) {
+          updateGpsHeaderBadge('error', 'GPS Tidak Didukung');
+          return;
+        }
+
+        updateGpsHeaderBadge('loading', 'Mendeteksi GPS...');
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            const shouldCenter = !state.hasAutoCenteredGps && !state.pickup && !state.dropoff;
+            state.hasAutoCenteredGps = true;
+            renderDeviceGpsOnMap(latitude, longitude, accuracy, shouldCenter);
+          },
+          (err) => {
+            handleGpsError(err);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+        );
+
+        state.gpsWatchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            const shouldCenter = !state.hasAutoCenteredGps && !state.pickup && !state.dropoff;
+            if (shouldCenter) state.hasAutoCenteredGps = true;
+            renderDeviceGpsOnMap(latitude, longitude, accuracy, shouldCenter);
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 15000 }
+        );
+      }
+
+      // =========================================================================
+      // FUNGSI HELPER FORMAT & VALIDASI
+      // =========================================================================
+      function formatIDR(amount) {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(Math.round(amount));
+      }
+
+      function formatDuration(seconds) {
+        if (!seconds || seconds <= 0) return '-';
+        const totalMin = Math.max(1, Math.round(seconds / 60));
+        const hrs = Math.floor(totalMin / 60);
+        const mins = totalMin % 60;
+        if (hrs > 0) {
+          return mins > 0 ? `${hrs} jam ${mins} menit` : `${hrs} jam`;
+        }
+        return `${mins} menit`;
+      }
+
+      function isWithinJatimBounds(lat, lng) {
+        return (
+          lat >= JATIM_BBOX.minLat &&
+          lat <= JATIM_BBOX.maxLat &&
+          lng >= JATIM_BBOX.minLng &&
+          lng <= JATIM_BBOX.maxLng
+        );
+      }
+
+      function showAlert(message, type = 'error') {
+        el.routeAlert.classList.remove(
+          'hidden',
+          'bg-rose-50', 'text-rose-700', 'border-rose-200',
+          'bg-amber-50', 'text-amber-800', 'border-amber-200'
+        );
+        if (type === 'warning') {
+          el.routeAlert.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-200');
+        } else {
+          el.routeAlert.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+        }
+        el.routeAlertText.textContent = message;
+      }
+
+      function hideAlert() {
+        el.routeAlert.classList.add('hidden');
+      }
+
+      // =========================================================================
+      // MANAJEMEN MODE PETA & MARKER
+      // =========================================================================
+      function setMapMode(mode) {
+        state.activeMapMode = mode;
+        if (mode === 'pickup') {
+          el.modePickupBtn.className = 'py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-white text-emerald-700 shadow-sm';
+          el.modeDropoffBtn.className = 'py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
+          el.mapHintDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0';
+          el.mapHintText.innerHTML = 'Klik peta untuk menentukan <strong>Titik Penjemputan</strong> (pin bisa digeser)';
+        } else {
+          el.modeDropoffBtn.className = 'py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 bg-white text-rose-600 shadow-sm';
+          el.modePickupBtn.className = 'py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
+          el.mapHintDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0';
+          el.mapHintText.innerHTML = 'Klik peta untuk menentukan <strong>Titik Tujuan</strong> (pin bisa digeser)';
+        }
+      }
+
+      function setPoint(type, lat, lng, labelText = null, shouldReverseGeocode = false) {
+        const isPickup = type === 'pickup';
+        const pointData = {
+          lat: Number(lat),
+          lng: Number(lng),
+          label: labelText || `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`
+        };
+
+        if (isPickup) {
+          state.pickup = pointData;
+          el.pickupInput.value = pointData.label;
+          el.btnClearPickup.classList.remove('hidden');
+        } else {
+          state.dropoff = pointData;
+          el.dropoffInput.value = pointData.label;
+          el.btnClearDropoff.classList.remove('hidden');
+        }
+
+        const existingMarker = isPickup ? state.pickupMarker : state.dropoffMarker;
+        if (existingMarker) {
+          existingMarker.setLatLng([pointData.lat, pointData.lng]);
+        } else {
+          const marker = L.marker([pointData.lat, pointData.lng], {
+            icon: createPinIcon(type),
+            draggable: true
+          }).addTo(map);
+
+          marker.on('dragend', (ev) => {
+            const pos = ev.target.getLatLng();
+            setPoint(type, pos.lat, pos.lng, null, true);
+          });
+
+          if (isPickup) state.pickupMarker = marker;
+          else state.dropoffMarker = marker;
+        }
+
+        if (shouldReverseGeocode) {
+          reverseGeocode(type, pointData.lat, pointData.lng);
+        }
+
+        if (!isWithinJatimBounds(pointData.lat, pointData.lng)) {
+          showAlert(`Lokasi ${isPickup ? 'penjemputan' : 'tujuan'} berada di luar wilayah operasional Provinsi Jawa Timur.`, 'warning');
+        } else if (!state.pickup || !state.dropoff) {
+          hideAlert();
+        }
+
+        if (isPickup && !state.dropoff) {
+          setMapMode('dropoff');
+        }
+
+        triggerRouting();
+      }
+
+      function clearPoint(type) {
+        const isPickup = type === 'pickup';
+        if (isPickup) {
+          state.pickup = null;
+          el.pickupInput.value = '';
+          el.btnClearPickup.classList.add('hidden');
+          if (state.pickupMarker) {
+            map.removeLayer(state.pickupMarker);
+            state.pickupMarker = null;
+          }
+          setMapMode('pickup');
+        } else {
+          state.dropoff = null;
+          el.dropoffInput.value = '';
+          el.btnClearDropoff.classList.add('hidden');
+          if (state.dropoffMarker) {
+            map.removeLayer(state.dropoffMarker);
+            state.dropoffMarker = null;
+          }
+          if (state.pickup) setMapMode('dropoff');
+        }
+
+        state.routingControl.setWaypoints([]);
+        state.routeDistanceKm = null;
+        state.routeDurationSec = null;
+        el.mapRouteBadge.classList.add('hidden');
+        if (!state.isManualDistance) {
+          el.distanceInput.value = 0;
+        }
+        hideAlert();
+        updateDistanceBadge();
+        calculateFare();
+      }
+
+      function triggerRouting() {
+        if (state.pickup && state.dropoff) {
+          el.mapLoading.classList.remove('hidden');
+          state.routingControl.setWaypoints([
+            L.latLng(state.pickup.lat, state.pickup.lng),
+            L.latLng(state.dropoff.lat, state.dropoff.lng)
+          ]);
+        } else if (state.pickup) {
+          map.panTo([state.pickup.lat, state.pickup.lng]);
+        } else if (state.dropoff) {
+          map.panTo([state.dropoff.lat, state.dropoff.lng]);
+        }
+      }
+
+      map.on('click', (e) => {
+        el.pickupResults.classList.add('hidden');
+        el.dropoffResults.classList.add('hidden');
+        setPoint(state.activeMapMode, e.latlng.lat, e.latlng.lng, null, true);
+      });
+
+      // =========================================================================
+      // NOMINATIM API (PRIORITAS BONDOWOSO & JAWA TIMUR)
+      // =========================================================================
+      async function reverseGeocode(type, lat, lng) {
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+          const res = await fetch(url, { headers: { 'Accept-Language': 'id' } });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && data.display_name) {
+            const shortName = formatNominatimShortName(data);
+            if (type === 'pickup' && state.pickup) {
+              state.pickup.label = shortName;
+              el.pickupInput.value = shortName;
+            } else if (type === 'dropoff' && state.dropoff) {
+              state.dropoff.label = shortName;
+              el.dropoffInput.value = shortName;
+            }
+
+            const stateName = data.address && (data.address.state || '');
+            if (stateName && !stateName.toLowerCase().includes('jawa timur') && !stateName.toLowerCase().includes('east java')) {
+              showAlert(`Perhatian: Lokasi terdeteksi di "${stateName}", di luar wilayah operasional Provinsi Jawa Timur.`, 'warning');
+            }
+          }
+        } catch {
+          // Abaikan error jaringan reverse geocode
+        }
+      }
+
+      function formatNominatimShortName(item) {
+        const parts = item.display_name.split(',').map(s => s.trim());
+        return parts.slice(0, 3).join(', ');
+      }
+
+      async function searchNominatim(type, query) {
+        const listEl = type === 'pickup' ? el.pickupResults : el.dropoffResults;
+        const trimmed = query.trim();
+
+        if (trimmed.length < 3) {
+          listEl.classList.add('hidden');
+          listEl.innerHTML = '';
+          return;
+        }
+
+        if (state.searchAbortControllers[type]) {
+          state.searchAbortControllers[type].abort();
+        }
+        const controller = new AbortController();
+        state.searchAbortControllers[type] = controller;
+
+        listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-slate-500">Mencari lokasi di Bondowoso & Jawa Timur...</li>`;
+        listEl.classList.remove('hidden');
+
+        try {
+          const viewbox = `${JATIM_BBOX.minLng},${JATIM_BBOX.maxLat},${JATIM_BBOX.maxLng},${JATIM_BBOX.minLat}`;
+          const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=7&countrycodes=id&viewbox=${viewbox}&bounded=1&q=${encodeURIComponent(trimmed)}`;
+
+          const res = await fetch(url, {
+            signal: controller.signal,
+            headers: { 'Accept-Language': 'id' }
+          });
+          if (!res.ok) throw new Error('Gagal mencari');
+          let results = await res.json();
+
+          // Prioritaskan hasil di Bondowoso terlebih dahulu, lalu Jawa Timur
+          results.sort((a, b) => {
+            const aName = (a.display_name || '').toLowerCase();
+            const bName = (b.display_name || '').toLowerCase();
+            const aScore = aName.includes('bondowoso') ? 0 : (aName.includes('jawa timur') ? 1 : 2);
+            const bScore = bName.includes('bondowoso') ? 0 : (bName.includes('jawa timur') ? 1 : 2);
+            return aScore - bScore;
+          });
+
+          if (!results.length) {
+            listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-slate-500">Lokasi tidak ditemukan di wilayah Bondowoso / Jawa Timur.</li>`;
+            return;
+          }
+
+          listEl.innerHTML = '';
+          results.forEach((item) => {
+            const li = document.createElement('li');
+            li.className = 'px-3.5 py-2.5 hover:bg-emerald-50 cursor-pointer transition flex items-start gap-2.5';
+            const mainTitle = item.display_name.split(',')[0];
+            const subTitle = item.display_name.split(',').slice(1, 4).join(', ');
+            li.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-800 truncate">${escapeHtml(mainTitle)}</p>
+                <p class="text-[11px] text-slate-500 truncate">${escapeHtml(subTitle)}</p>
+              </div>
+            `;
+            li.addEventListener('click', () => {
+              listEl.classList.add('hidden');
+              setPoint(type, item.lat, item.lon, formatNominatimShortName(item), false);
+            });
+            listEl.appendChild(li);
+          });
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          listEl.innerHTML = `<li class="px-3.5 py-2.5 text-xs text-rose-600">Gagal memuat saran alamat. Silakan klik peta langsung.</li>`;
+        }
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, (m) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+      }
+
+      function debounce(fn, delay) {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), delay);
+        };
+      }
+
+      // =========================================================================
+      // PENGHITUNGAN TARIF & UPDATE RINGKASAN
+      // =========================================================================
+      function updateDistanceBadge() {
+        if (state.isManualDistance) {
+          el.distanceSourceBadge.textContent = 'Diubah manual';
+          el.distanceSourceBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+          el.btnSyncDistance.classList.toggle('hidden', state.routeDistanceKm === null);
+        } else if (state.routeDistanceKm !== null) {
+          el.distanceSourceBadge.textContent = 'Otomatis dari peta';
+          el.distanceSourceBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+          el.btnSyncDistance.classList.add('hidden');
+        } else {
+          el.distanceSourceBadge.textContent = 'Menunggu rute';
+          el.distanceSourceBadge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
+          el.btnSyncDistance.classList.add('hidden');
+        }
+      }
+
+      function calculateFare() {
+        const distanceKm = Math.max(0, parseFloat(el.distanceInput.value) || 0);
+        const tollFee = Math.max(0, parseFloat(el.tollInput.value) || 0);
+
+        const selectedService = document.querySelector('input[name="service-type"]:checked');
+        const ratePerKm = parseFloat(selectedService.value);
+        const serviceLabel = selectedService.dataset.label;
+
+        const selectedSurge = document.querySelector('input[name="surge-multiplier"]:checked');
+        const surgeMultiplier = parseFloat(selectedSurge.value);
+
+        const baseDistanceFare = distanceKm * ratePerKm;
+        const surgeFee = baseDistanceFare * (surgeMultiplier - 1);
+
+        const hasTripData = distanceKm > 0 || tollFee > 0;
+        const platformFee = hasTripData ? Math.max(10000, baseDistanceFare * 0.05) : 0;
+        const totalFare = baseDistanceFare + surgeFee + platformFee + tollFee;
+
+        el.summaryServiceBadge.textContent = serviceLabel;
+        el.sumDistance.textContent = `${distanceKm.toFixed(distanceKm % 1 === 0 ? 0 : 2)} km`;
+
+        if (!state.isManualDistance && state.routeDurationSec !== null) {
+          el.sumDuration.textContent = formatDuration(state.routeDurationSec);
+        } else if (distanceKm > 0) {
+          const estSec = (distanceKm / 30) * 3600;
+          el.sumDuration.textContent = `~${formatDuration(estSec)} (estimasi)`;
+        } else {
+          el.sumDuration.textContent = '-';
+        }
+
+        el.sumRate.textContent = `${formatIDR(ratePerKm)}/km`;
+        el.sumBaseFare.textContent = formatIDR(baseDistanceFare);
+
+        if (surgeMultiplier > 1.0) {
+          el.rowSurge.classList.remove('hidden');
+          el.sumSurgeLabel.textContent = `${surgeMultiplier.toFixed(1)}x`;
+          el.sumSurgeFee.textContent = `+${formatIDR(surgeFee)}`;
+        } else {
+          el.rowSurge.classList.add('hidden');
+        }
+
+        el.sumPlatformFee.textContent = formatIDR(platformFee);
+
+        if (tollFee > 0) {
+          el.rowToll.classList.remove('hidden');
+          el.sumTollFee.textContent = formatIDR(tollFee);
+        } else {
+          el.rowToll.classList.add('hidden');
+        }
+
+        el.sumTotal.textContent = formatIDR(totalFare);
+      }
+
+      // =========================================================================
+      // EVENT LISTENERS
+      // =========================================================================
+      const debouncedPickupSearch = debounce((val) => searchNominatim('pickup', val), 400);
+      const debouncedDropoffSearch = debounce((val) => searchNominatim('dropoff', val), 400);
+
+      el.pickupInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        el.btnClearPickup.classList.toggle('hidden', val.length === 0);
+        debouncedPickupSearch(val);
+      });
+
+      el.dropoffInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        el.btnClearDropoff.classList.toggle('hidden', val.length === 0);
+        debouncedDropoffSearch(val);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!el.pickupInput.contains(e.target) && !el.pickupResults.contains(e.target)) {
+          el.pickupResults.classList.add('hidden');
+        }
+        if (!el.dropoffInput.contains(e.target) && !el.dropoffResults.contains(e.target)) {
+          el.dropoffResults.classList.add('hidden');
+        }
+      });
+
+      el.btnClearPickup.addEventListener('click', () => clearPoint('pickup'));
+      el.btnClearDropoff.addEventListener('click', () => clearPoint('dropoff'));
+
+      el.modePickupBtn.addEventListener('click', () => setMapMode('pickup'));
+      el.modeDropoffBtn.addEventListener('click', () => setMapMode('dropoff'));
+
+      el.btnGpsPickup.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          showAlert('Browser Anda tidak mendukung fitur GPS/Geolocation.', 'error');
+          return;
+        }
+        el.pickupInput.value = 'Mendeteksi lokasi GPS...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            renderDeviceGpsOnMap(latitude, longitude, accuracy, false);
+            setPoint('pickup', latitude, longitude, null, true);
+            map.flyTo([latitude, longitude], GPS_ZOOM, { duration: 0.9 });
+          },
+          (err) => {
+            el.pickupInput.value = state.pickup ? state.pickup.label : '';
+            showAlert(handleGpsError(err), 'error');
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 }
+        );
+      });
+
+      el.btnGpsCenter.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          showAlert('Browser Anda tidak mendukung fitur GPS/Geolocation.', 'error');
+          return;
+        }
+        updateGpsHeaderBadge('loading', 'Menyegarkan GPS...');
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            renderDeviceGpsOnMap(latitude, longitude, accuracy, true);
+            if (state.deviceGpsMarker) state.deviceGpsMarker.openPopup();
+          },
+          (err) => {
+            showAlert(handleGpsError(err), 'error');
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
+
+      el.btnSwapPoints.addEventListener('click', () => {
+        if (!state.pickup && !state.dropoff) return;
+        const oldPickup = state.pickup ? { ...state.pickup } : null;
+        const oldDropoff = state.dropoff ? { ...state.dropoff } : null;
+
+        clearPoint('pickup');
+        clearPoint('dropoff');
+
+        if (oldDropoff) setPoint('pickup', oldDropoff.lat, oldDropoff.lng, oldDropoff.label, false);
+        if (oldPickup) setPoint('dropoff', oldPickup.lat, oldPickup.lng, oldPickup.label, false);
+      });
+
+      document.querySelectorAll('.preset-route').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const { pLat, pLng, pName, dLat, dLng, dName } = btn.dataset;
+          setPoint('pickup', pLat, pLng, pName, false);
+          setPoint('dropoff', dLat, dLng, dName, false);
+        });
+      });
+
+      el.distanceInput.addEventListener('input', () => {
+        state.isManualDistance = true;
+        updateDistanceBadge();
+        calculateFare();
+      });
+
+      el.btnSyncDistance.addEventListener('click', () => {
+        if (state.routeDistanceKm !== null) {
+          state.isManualDistance = false;
+          el.distanceInput.value = state.routeDistanceKm.toFixed(2);
+          updateDistanceBadge();
+          calculateFare();
+        }
+      });
+
+      document.querySelectorAll('input[name="service-type"], input[name="surge-multiplier"]').forEach((radio) => {
+        radio.addEventListener('change', calculateFare);
+      });
+      el.tollInput.addEventListener('input', calculateFare);
+
+      // Fokus kembali ke Kota Bondowoso
+      el.btnCenterBondowoso.addEventListener('click', () => {
+        if (state.pickup && state.dropoff) {
+          map.fitBounds(L.latLngBounds([
+            [state.pickup.lat, state.pickup.lng],
+            [state.dropoff.lat, state.dropoff.lng]
+          ]), { padding: [50, 50] });
+        } else {
+          map.flyTo(BONDOWOSO_CENTER, BONDOWOSO_ZOOM, { duration: 0.9 });
+        }
+      });
+
+      el.btnResetAll.addEventListener('click', () => {
+        clearPoint('pickup');
+        clearPoint('dropoff');
+        state.isManualDistance = false;
+        el.distanceInput.value = 0;
+        el.tollInput.value = 0;
+        document.querySelector('input[name="service-type"][value="6000"]').checked = true;
+        document.querySelector('input[name="surge-multiplier"][value="1.0"]').checked = true;
+        setMapMode('pickup');
+        hideAlert();
+        updateDistanceBadge();
+        calculateFare();
+
+        if (state.deviceGps && isWithinJatimBounds(state.deviceGps.lat, state.deviceGps.lng)) {
+          map.flyTo([state.deviceGps.lat, state.deviceGps.lng], GPS_ZOOM, { duration: 0.8 });
+        } else {
+          map.flyTo(BONDOWOSO_CENTER, BONDOWOSO_ZOOM, { duration: 0.8 });
+        }
+      });
+
+      // Inisialisasi awal & deteksi GPS perangkat
+      setMapMode('pickup');
+      updateDistanceBadge();
+      calculateFare();
+      initDeviceGps();
+    })();
+  </script>
+
+  <!-- Registrasi Service Worker PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('Ayo Jalan PWA siap diinstal'))
+          .catch((err) => console.warn('Service Worker tidak aktif:', err));
+      });
+    }
+  </script>
+</body>
+</html>
