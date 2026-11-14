@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Ayo Jalan - Monitor &amp; Pengaturan Bondowoso</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./ayo-jalan-core.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- PIN ADMIN -->
+  <div id="admin-lock" class="fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+      <h2 class="text-lg font-extrabold">Dashboard Admin Ayo Jalan</h2>
+      <p class="text-xs text-slate-500">Masukkan PIN Admin (Default: 9999)</p>
+      <input id="admin-pin-in" type="password" inputmode="numeric" placeholder="PIN Admin" class="w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-xl bg-slate-50 border border-slate-300" />
+      <p id="admin-pin-err" class="hidden text-xs font-semibold text-rose-600">PIN Admin salah.</p>
+      <button id="btn-admin-unlock" type="button" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">Masuk Dashboard</button>
+    </div>
+  </div>
+
+  <header class="bg-slate-900 text-white px-6 h-16 flex items-center justify-between">
+    <div><h1 class="font-bold text-base">Ayo Jalan • Admin Center</h1><p id="db-mode-badge" class="text-[11px] text-emerald-400">Memeriksa koneksi database...</p></div>
+    <a href="./index.html" class="text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20">Halaman Penumpang</a>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <!-- Warning jika Supabase belum diisi -->
+    <div id="no-db-warning" class="hidden bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl text-xs">
+      <strong>Mode Offline / WhatsApp Aktif:</strong> Isi <code>SUPABASE_URL</code> dan <code>SUPABASE_ANON_KEY</code> di file <code>ayo-jalan-core.js</code> (serta jalankan <code>schema.sql</code> di Supabase) agar Dashboard Admin menampilkan monitor order live, persetujuan withdraw, dan manajemen driver secara real-time.
+    </div>
+
+    <!-- Peta Live & Order Aktif -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+        <div class="flex justify-between items-center"><h2 class="text-sm font-bold uppercase">Peta Driver &amp; Order Aktif</h2><button id="btn-refresh-all" type="button" class="text-xs font-semibold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700">Refresh</button></div>
+        <div id="admin-map" class="w-full h-80 rounded-xl bg-emerald-50"></div>
+        <h3 class="text-xs font-bold uppercase text-slate-500 pt-2">Daftar Order Terbaru</h3>
+        <div id="admin-orders-list" class="space-y-2 text-xs max-h-64 overflow-y-auto"></div>
+      </section>
+
+      <!-- Kelola Withdraw & Tarif -->
+      <div class="lg:col-span-5 space-y-6">
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+          <h2 class="text-sm font-bold uppercase">Persetujuan Withdraw Driver</h2>
+          <div id="admin-withdraws-list" class="space-y-2 text-xs max-h-60 overflow-y-auto"><p class="text-slate-400">Belum ada pengajuan.</p></div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 text-xs">
+          <h2 class="text-sm font-bold uppercase">Pengaturan Tarif Live (Rp/km)</h2>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div><label class="font-semibold">Motor/km</label><input id="t-motor" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+            <div><label class="font-semibold">Min. Motor</label><input id="t-motor-min" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+            <div><label class="font-semibold">Mobil Hemat</label><input id="t-hemat" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+            <div><label class="font-semibold">Mobil Reguler</label><input id="t-reguler" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+            <div><label class="font-semibold">Mobil XL</label><input id="t-xl" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+            <div><label class="font-semibold">Min. Mobil</label><input id="t-car-min" type="number" class="w-full mt-1 px-3 py-1.5 rounded-lg border bg-slate-50" /></div>
+          </div>
+          <button id="btn-save-tariffs" type="button" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Simpan Tarif ke Database</button>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 text-xs">
+          <h2 class="text-sm font-bold uppercase">Tambah Akun Mitra Driver</h2>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="d-name" type="text" placeholder="Nama Driver" class="px-3 py-2 rounded-lg border bg-slate-50" />
+            <input id="d-plate" type="text" placeholder="Plat (P 1234 AB)" class="px-3 py-2 rounded-lg border bg-slate-50" />
+            <input id="d-phone" type="tel" placeholder="No HP (0812...)" class="px-3 py-2 rounded-lg border bg-slate-50" />
+            <input id="d-pin" type="text" placeholder="PIN (4-6 angka)" class="px-3 py-2 rounded-lg border bg-slate-50" />
+          </div>
+          <button id="btn-add-driver" type="button" class="w-full py-2 rounded-xl bg-slate-800 text-white font-bold">+ Daftarkan Driver</button>
+          <div id="admin-drivers-list" class="space-y-1.5 pt-2"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    (async () => {
+      const C = window.AYO_CORE, CFG = window.AYO_CONFIG, sb = C.getSupabase();
+      const map = L.map('admin-map', { center: C.BONDOWOSO_CENTER, zoom: C.BONDOWOSO_ZOOM });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      let driverMarkers = [];
+
+      document.getElementById('btn-admin-unlock').addEventListener('click', () => {
+        if (document.getElementById('admin-pin-in').value.trim() === CFG.ADMIN_PIN) {
+          document.getElementById('admin-lock').classList.add('hidden');
+          setTimeout(() => map.invalidateSize(), 150);
+          loadAll();
+        } else document.getElementById('admin-pin-err').classList.remove('hidden');
+      });
+
+      if (!sb) {
+        document.getElementById('db-mode-badge').textContent = 'Mode Offline (Supabase belum diisi)';
+        document.getElementById('no-db-warning').classList.remove('hidden');
+      } else {
+        document.getElementById('db-mode-badge').textContent = 'Terhubung ke Supabase Real-Time';
+      }
+
+      async function loadAll() {
+        const t = await C.fetchActiveTariffs();
+        document.getElementById('t-motor').value = t.motor_rate; document.getElementById('t-motor-min').value = t.motor_min;
+        document.getElementById('t-hemat').value = t.hemat_rate; document.getElementById('t-reguler').value = t.reguler_rate;
+        document.getElementById('t-xl').value = t.xl_rate; document.getElementById('t-car-min').value = t.car_min;
+        if (!sb) return;
+
+        const [{ data: orders }, { data: wds }, { data: drivers }] = await Promise.all([
+          sb.from('orders').select('*').order('created_at', { ascending: false }).limit(20),
+          sb.from('withdraws').select('*').order('created_at', { ascending: false }).limit(20),
+          sb.from('drivers').select('*').order('name')
+        ]);
+
+        // Orders
+        const oEl = document.getElementById('admin-orders-list'); oEl.innerHTML = '';
+        (orders || []).forEach(o => {
+          const div = document.createElement('div'); div.className = 'p-2.5 rounded-xl bg-slate-50 border flex justify-between items-center gap-2';
+          div.innerHTML = `<div><span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold uppercase text-[10px]">${o.status}</span> <strong>${C.escapeHtml(o.passenger_name)}</strong> (${C.formatIDR(o.total_fare)})<p class="text-[11px] text-slate-500">${C.escapeHtml(o.pickup_name)} → ${C.escapeHtml(o.dropoff_name)}</p></div><span class="text-[11px] font-semibold">${C.escapeHtml(o.driver_name || '-')}</span>`;
+          oEl.appendChild(div);
+        });
+
+        // Withdraws
+        const wEl = document.getElementById('admin-withdraws-list'); wEl.innerHTML = '';
+        (wds || []).forEach(w => {
+          const div = document.createElement('div'); div.className = 'p-2.5 rounded-xl bg-slate-50 border flex justify-between items-center gap-2';
+          div.innerHTML = `<div><p class="font-bold">${C.escapeHtml(w.driver_name)} • ${C.formatIDR(w.amount)}</p><p class="text-[11px] text-slate-500">${C.escapeHtml(w.bank_name)} ${C.escapeHtml(w.account_number)} (${C.escapeHtml(w.account_holder)})</p></div>
+            ${w.status === 'pending' ? `<button class="btn-pay px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold" data-id="${w.id}">Tandai Cair</button>` : `<span class="text-emerald-700 font-bold uppercase">${w.status}</span>`}`;
+          const btn = div.querySelector('.btn-pay');
+          if (btn) btn.addEventListener('click', async () => { await sb.from('withdraws').update({ status: 'paid' }).eq('id', w.id); loadAll(); });
+          wEl.appendChild(div);
+        });
+
+        // Drivers & Map
+        driverMarkers.forEach(m => map.removeLayer(m)); driverMarkers = [];
+        const dEl = document.getElementById('admin-drivers-list'); dEl.innerHTML = '';
+        (drivers || []).forEach(d => {
+          const div = document.createElement('div'); div.className = 'p-2 rounded-lg bg-slate-50 border flex justify-between items-center';
+          div.innerHTML = `<span><strong>${C.escapeHtml(d.name)}</strong> (${C.escapeHtml(d.plate)}) • ${d.phone}</span><button class="text-rose-600 font-semibold" data-id="${d.id}">Hapus</button>`;
+          div.querySelector('button').addEventListener('click', async () => { if (confirm('Hapus driver?')) { await sb.from('drivers').delete().eq('id', d.id); loadAll(); } });
+          dEl.appendChild(div);
+          if (d.last_lat && d.last_lng) driverMarkers.push(L.marker([d.last_lat, d.last_lng]).addTo(map).bindPopup(`<strong>${C.escapeHtml(d.name)}</strong><br>${C.escapeHtml(d.plate)}`));
+        });
+      }
+
+      document.getElementById('btn-refresh-all').addEventListener('click', loadAll);
+      document.getElementById('btn-save-tariffs').addEventListener('click', async () => {
+        if (!sb) return alert('Supabase belum dikonfigurasi di ayo-jalan-core.js');
+        await sb.from('app_settings').upsert({
+          id: 1,
+          motor_rate: Number(document.getElementById('t-motor').value), motor_min: Number(document.getElementById('t-motor-min').value),
+          hemat_rate: Number(document.getElementById('t-hemat').value), reguler_rate: Number(document.getElementById('t-reguler').value),
+          xl_rate: Number(document.getElementById('t-xl').value), car_min: Number(document.getElementById('t-car-min').value)
+        });
+        alert('Tarif baru tersimpan & langsung berlaku!');
+      });
+
+      document.getElementById('btn-add-driver').addEventListener('click', async () => {
+        if (!sb) return alert('Supabase belum dikonfigurasi.');
+        const phone = C.normalizePhoneWa(document.getElementById('d-phone').value);
+        await sb.from('drivers').insert([{
+          name: document.getElementById('d-name').value.trim(),
+          plate: document.getElementById('d-plate').value.trim(),
+          phone, pin: document.getElementById('d-pin').value.trim() || '1234'
+        }]);
+        document.getElementById('d-name').value = ''; document.getElementById('d-plate').value = ''; document.getElementById('d-phone').value = ''; document.getElementById('d-pin').value = '';
+        loadAll();
+      });
+    })();
+  </script>
+</body>
+</html>
